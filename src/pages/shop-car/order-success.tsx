@@ -135,7 +135,7 @@ const OrderSuccess: React.FC<OrderSuccessProps> = (props) => {
         let orderList: any = window.localStorage.getItem(
           `${userInfo.id}-orderList`
         );
-        const selectedOrderIds = window.localStorage.getItem(
+        const selectedOrderIds = window.sessionStorage.getItem(
           "selectedOrderIds"
         );
         if (selectedOrderIds) {
