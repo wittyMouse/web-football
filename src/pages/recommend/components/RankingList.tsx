@@ -4,10 +4,11 @@ import { Link } from "react-router-dom";
 interface RankingListProps {
   title: string;
   userList: any[];
+  url: string;
 }
 
 const RankingList: React.FC<RankingListProps> = (props) => {
-  const { title, userList } = props;
+  const { title, userList, url } = props;
 
   return (
     <div className="box-s b-w pading-1 m-b24">
@@ -17,7 +18,7 @@ const RankingList: React.FC<RankingListProps> = (props) => {
           const { avatar, description, id, realname, result, resultMap } = item;
           return (
             <dl className="bp-list" key={id}>
-              <Link to={`/recommend/detail/${id}`}>
+              <Link to={`${url}/${id}`}>
                 <dd className="dd01">
                   {idx < 3 ? (
                     <img

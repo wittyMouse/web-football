@@ -130,8 +130,8 @@ const Recommend: React.FC<RecommendProps> = () => {
           <Card title="至尊赢利套餐" userList={userList5} />
         </div>
         <div className="f_l b-right">
-          <RankingList title="王牌推介榜" userList={userList1} />
-          <RankingList title="劲爆贴士榜" userList={userList2} />
+          <RankingList title="王牌推介榜" userList={userList1} url="/recommend/detail" />
+          <RankingList title="劲爆贴士榜" userList={userList2} url="/latest-clue/profile" />
         </div>
       </div>
 
