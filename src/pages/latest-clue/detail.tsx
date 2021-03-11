@@ -177,7 +177,8 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
         // 已购买
         return (
           <div
-            className="b-cont"
+            className="b-cont ck-content"
+            style={{ lineHeight: 'unset' }}
             dangerouslySetInnerHTML={{ __html: articleDetail.articleURL }}
           />
         );

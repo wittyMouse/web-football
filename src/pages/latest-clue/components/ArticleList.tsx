@@ -30,14 +30,16 @@ const ArticleList: React.FC<ArticleListProps> = (props) => {
                 <p>
                   <b>{amount}</b>币
                 </p>
-                <span>
+                <span className="label">
                   {/* <Link to={`/latest-clue/profile/${userId}`}>{realName}</Link>： */}
                   <Link to={`/latest-clue/profile/${userId}`}>{realName}</Link>
                   ：
                 </span>
-                <Link to={`/latest-clue/detail/${articleId}`}>
-                  {articleTitle}
-                </Link>
+                <span className="content text-ellipsis">
+                  <Link style={{ maxWidth: 'px' }} to={`/latest-clue/detail/${articleId}`}>
+                    {articleTitle}
+                  </Link>
+                </span>
               </li>
             );
           })}

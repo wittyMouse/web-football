@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { HashRouter as Router } from "react-router-dom";
 import "./assets/style.css";
+import "./assets/ck-editor.css"
 import App from "./App";
 import store from "./store";
 import { Provider } from "react-redux";

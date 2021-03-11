@@ -977,14 +977,21 @@ input:-ms-input-placeholder {
   color: #c7000b;
 }
 .blog-tt li span {
+  display: inline-block;
+  vertical-align: middle;
+}
+.blog-tt li .label {
   color: #000;
   font-weight: 600;
 }
-.blog-tt li span a {
+.blog-tt li .label a {
   color: #000;
 }
-.blog-tt li span a:hover {
+.blog-tt li .label a:hover {
   text-decoration: underline;
+}
+.blog-tt li .content {
+  max-width: 330px;
 }
 .blog-tt p {
   position: absolute;

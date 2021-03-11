@@ -25,7 +25,7 @@ const RecommendList: React.FC<RecommendListProps> = (props) => {
             } = item;
 
             return (
-              <li key={articleId}>
+              <li className="text-ellipsis" key={articleId}>
                 <span>
                   <Link to={`/latest-clue/profile/${userId}`}>{realName}</Link>
                 </span>

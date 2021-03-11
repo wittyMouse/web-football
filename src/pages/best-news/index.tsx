@@ -150,7 +150,7 @@ const BestNews: React.FC<BestNewsProps> = () => {
               重大利好
             </h1>
             <div
-              className="bolg-cont"
+              className="bolg-cont ck-content"
               style={{ paddingTop: 0 }}
               dangerouslySetInnerHTML={{ __html: dataSource.content }}
             ></div>
