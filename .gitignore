@@ -10,6 +10,7 @@
 
 # production
 /build
+/football
 
 # misc
 .DS_Store

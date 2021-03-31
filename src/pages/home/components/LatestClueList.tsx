@@ -20,14 +20,19 @@ const LatestClueList: React.FC<LatestClueListProps> = (props) => {
           </Link>
         </span>
       </h1>
-      <table className="basic-table" style={{ width: "540px" }}>
+      <table className="basic-table" style={{ width: "540px", tableLayout: 'fixed' }}>
+        <colgroup>
+          <col width="80" />
+          <col width="120" />
+          <col width="340" />
+        </colgroup>
         <tbody>
           <tr>
-            <th style={{ width: "80px" }} className="p-12">
+            <th className="p-12">
               时间
             </th>
-            <th style={{ width: "120px" }}>专家</th>
-            <th style={{ width: "307px" }}>博客文章</th>
+            <th>专家</th>
+            <th>博客文章</th>
           </tr>
           {latestArticleList
             ?.map((item) => {
@@ -54,7 +59,7 @@ const LatestClueList: React.FC<LatestClueListProps> = (props) => {
                   </td>
                   <td>
                     <Link to={`/latest-clue/detail/${articleId}`}>
-                      {articleTitle}
+                      <div className="text-ellipsis">{articleTitle}</div>
                     </Link>
                   </td>
                 </tr>

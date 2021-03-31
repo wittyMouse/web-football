@@ -12,10 +12,14 @@ const RankingList: React.FC<RankingListProps> = (props) => {
 
   return (
     <div className="box-s b-w pading-1 m-b24">
-      <h1 className="title-bg02 h-bg10">{title}</h1>
+      <h1 className="title-bg02 h-bg10">
+        {title}
+        <div className="tips-text">（每周一更新）</div>
+      </h1>
       <div className="mjzl-v2">
         {userList?.map((item: any, idx: number) => {
-          const { avatar, description, id, realname, result, resultMap } = item;
+          // const { avatar, description, id, realname, result, resultMap } = item;
+          const { avatar, id, realname, tui, zhong, zou, fu } = item;
           return (
             <dl className="bp-list" key={id}>
               <Link to={`${url}/${id}`}>
@@ -36,11 +40,14 @@ const RankingList: React.FC<RankingListProps> = (props) => {
                 </dd>
                 <dt>
                   {realname}
-                  <p>{`推:${result ? result.length : 0} 中:${
+                  {/* <p>{`推:${result ? result.length : 0} 中:${
                     resultMap ? resultMap[1] || 0 : 0
                   } 走:${resultMap ? resultMap[0] || 0 : 0} 负:${
                     resultMap ? resultMap[-1] || 0 : 0
-                  }`}</p>
+                  }`}</p> */}
+                  <p>
+                    推:{tui} 中:{zhong} 走:{zou} 负: {fu}
+                  </p>
                 </dt>
               </Link>
             </dl>

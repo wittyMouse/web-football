@@ -24,6 +24,7 @@ const RankingList: React.FC<RankingListProps> = (props) => {
     <div className={wrapperClass}>
       <h1 className={`title-bg01 ${headerClass}`}>
         {title}
+        <div className="tips-text">（每周一更新）</div>
         <span>
           <Link to={path} className="f5">
             更多
@@ -32,7 +33,8 @@ const RankingList: React.FC<RankingListProps> = (props) => {
       </h1>
       {userList
         ?.map((item: any, idx: number) => {
-          const { avatar, description, id, realname, result, resultMap } = item;
+          // const { avatar, description, id, realname, result, resultMap } = item;
+          const { avatar, id, realname, tui, zhong, zou, fu } = item;
           if (idx < 3) {
             return (
               <dl className="i-list" key={idx}>
@@ -51,11 +53,12 @@ const RankingList: React.FC<RankingListProps> = (props) => {
                   </dd>
                   <dt>
                     {realname}
-                    <p>{`推:${result ? result.length : 0} 中:${
+                    {/* <p>{`推:${result ? result.length : 0} 中:${
                       resultMap ? resultMap[1] || 0 : 0
                     } 走:${resultMap ? resultMap[0] || 0 : 0} 负:${
                       resultMap ? resultMap[-1] || 0 : 0
-                    }`}</p>
+                    }`}</p> */}
+                    <p>推:{tui} 中:{zhong} 走:{zou} 负: {fu}</p>
                   </dt>
                 </Link>
               </dl>
@@ -67,11 +70,12 @@ const RankingList: React.FC<RankingListProps> = (props) => {
                   <dd className="dd01">{idx + 1}</dd>
                   <dt>
                     {realname}
-                    <p>{`推:${result ? result.length : 0} 中:${
+                    {/* <p>{`推:${result ? result.length : 0} 中:${
                       resultMap ? resultMap[1] || 0 : 0
                     } 走:${resultMap ? resultMap[0] || 0 : 0} 负:${
                       resultMap ? resultMap[-1] || 0 : 0
-                    }`}</p>
+                    }`}</p> */}
+                    <p>推:{tui} 中:{zhong} 走:{zou} 负: {fu}</p>
                   </dt>
                 </Link>
               </dl>

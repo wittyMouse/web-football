@@ -10,6 +10,7 @@ import {
   requestArticleList,
   requestUserInfoByDepartment,
   requestLatestArticleList,
+  requestRankingList,
 } from "./service";
 import { requestAdConfigInfo } from "../../service";
 
@@ -92,6 +93,21 @@ const Home: React.FC<HomeProps> = (props) => {
     });
   };
 
+  const getRankingList = (type: number, cb: (result: any) => void) => {
+    const data = {
+      type,
+      pageNo: 1,
+      pageSize: 10,
+    };
+    requestRankingList(data).then((res) => {
+      if (res.data.code === 0) {
+        cb && cb(res.data.result.records);
+      } else {
+        console.error(res.data.message);
+      }
+    });
+  };
+
   useEffect(() => {
     getAdConfigInfo((result) => {
       if (result && result[0]) {
@@ -118,17 +134,28 @@ const Home: React.FC<HomeProps> = (props) => {
         }
         getArticleList();
         getLatestArticleList();
-        // 名家指路
-        getUserList("1", (result) => {
-          setUserList1(result);
-        });
-        // 预言家
-        getUserList("2", (result) => {
-          setUserList2(result);
-        });
+        // // 名家指路
+        // getUserList("1", (result) => {
+        //   setUserList1(result);
+        // });
+        // // 预言家
+        // getUserList("2", (result) => {
+        //   setUserList2(result);
+        // });
         // 至尊精选推荐
         getUserList("3", (result) => {
           setUserList3(result);
+        });
+
+        // 王牌推介榜
+        getRankingList(0, (result) => {
+          // console.log(result);
+          setUserList1(result);
+        });
+        // 劲爆贴士榜
+        getRankingList(1, (result) => {
+          // console.log(result);
+          setUserList2(result);
         });
       }
     } else {
@@ -141,17 +168,28 @@ const Home: React.FC<HomeProps> = (props) => {
       });
       getArticleList();
       getLatestArticleList();
-      // 名家指路
-      getUserList("1", (result) => {
-        setUserList1(result);
-      });
-      // 预言家
-      getUserList("2", (result) => {
-        setUserList2(result);
-      });
+      // // 名家指路
+      // getUserList("1", (result) => {
+      //   setUserList1(result);
+      // });
+      // // 预言家
+      // getUserList("2", (result) => {
+      //   setUserList2(result);
+      // });
+
       // 王牌情报组
       getUserList("3", (result) => {
         setUserList3(result);
+      });
+      // 王牌推介榜
+      getRankingList(0, (result) => {
+        // console.log(result);
+        setUserList1(result);
+      });
+      // 劲爆贴士榜
+      getRankingList(1, (result) => {
+        // console.log(result);
+        setUserList2(result);
       });
     }
   }, [isLogin]);

@@ -35,3 +35,15 @@ export function requestUserInfoByDepartment(params: any) {
     data: params,
   });
 }
+
+/**
+ * 获取分页榜单列表
+ * @param token
+ */
+export function requestRankingList(data: any) {
+  return request({
+    url: "/api/member/rankingList",
+    method: "post",
+    data
+  });
+}

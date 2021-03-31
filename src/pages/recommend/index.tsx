@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/index";
 import Card from "./components/Card";
 import RankingList from "./components/RankingList";
-import { requestUserInfoByDepartment } from "./service";
+import { requestUserInfoByDepartment, requestRankingList } from "./service";
 import { requestAdConfigInfo } from "../../service";
 
 interface RecommendProps {}
@@ -42,6 +42,21 @@ const Recommend: React.FC<RecommendProps> = () => {
     });
   };
 
+  const getRankingList = (type: number, cb: (result: any) => void) => {
+    const data = {
+      type,
+      pageNo: 1,
+      pageSize: 10,
+    };
+    requestRankingList(data).then((res) => {
+      if (res.data.code === 0) {
+        cb && cb(res.data.result.records);
+      } else {
+        console.error(res.data.message);
+      }
+    });
+  };
+
   useEffect(() => {
     getAdConfigInfo((result) => {
       if (result) {
@@ -63,14 +78,14 @@ const Recommend: React.FC<RecommendProps> = () => {
     const token = localStorage.getItem("token");
     if (token) {
       if (isLogin) {
-        // 名家指路
-        getUserList("1", (result) => {
-          setUserList1(result);
-        });
-        // 预言家
-        getUserList("2", (result) => {
-          setUserList2(result);
-        });
+        // // 名家指路
+        // getUserList("1", (result) => {
+        //   setUserList1(result);
+        // });
+        // // 预言家
+        // getUserList("2", (result) => {
+        //   setUserList2(result);
+        // });
         // 至尊精选推荐
         getUserList("4", (result) => {
           setUserList3(result);
@@ -83,16 +98,27 @@ const Recommend: React.FC<RecommendProps> = () => {
         getUserList("6", (result) => {
           setUserList5(result);
         });
+
+        // 王牌推介榜
+        getRankingList(0, (result) => {
+          // console.log(result);
+          setUserList1(result);
+        });
+        // 劲爆贴士榜
+        getRankingList(1, (result) => {
+          // console.log(result);
+          setUserList2(result);
+        });
       }
     } else {
-      // 名家指路
-      getUserList("1", (result) => {
-        setUserList1(result);
-      });
-      // 预言家
-      getUserList("2", (result) => {
-        setUserList2(result);
-      });
+      // // 名家指路
+      // getUserList("1", (result) => {
+      //   setUserList1(result);
+      // });
+      // // 预言家
+      // getUserList("2", (result) => {
+      //   setUserList2(result);
+      // });
       // 至尊精选推荐
       getUserList("4", (result) => {
         setUserList3(result);
@@ -104,6 +130,17 @@ const Recommend: React.FC<RecommendProps> = () => {
       // 至尊赢利套餐
       getUserList("6", (result) => {
         setUserList5(result);
+      });
+
+      // 王牌推介榜
+      getRankingList(0, (result) => {
+        // console.log(result);
+        setUserList1(result);
+      });
+      // 劲爆贴士榜
+      getRankingList(1, (result) => {
+        // console.log(result);
+        setUserList2(result);
       });
     }
   }, [isLogin]);
