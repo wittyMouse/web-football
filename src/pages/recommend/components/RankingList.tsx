@@ -19,10 +19,10 @@ const RankingList: React.FC<RankingListProps> = (props) => {
       <div className="mjzl-v2">
         {userList?.map((item: any, idx: number) => {
           // const { avatar, description, id, realname, result, resultMap } = item;
-          const { avatar, id, realname, tui, zhong, zou, fu } = item;
+          const { avatar, userId, realname, tui, zhong, zou, fu } = item;
           return (
-            <dl className="bp-list" key={id}>
-              <Link to={`${url}/${id}`}>
+            <dl className="bp-list" key={userId}>
+              <Link to={`${url}/${userId}`}>
                 <dd className="dd01">
                   {idx < 3 ? (
                     <img

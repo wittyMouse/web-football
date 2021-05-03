@@ -34,11 +34,11 @@ const RankingList: React.FC<RankingListProps> = (props) => {
       {userList
         ?.map((item: any, idx: number) => {
           // const { avatar, description, id, realname, result, resultMap } = item;
-          const { avatar, id, realname, tui, zhong, zou, fu } = item;
+          const { avatar, userId, realname, tui, zhong, zou, fu } = item;
           if (idx < 3) {
             return (
               <dl className="i-list" key={idx}>
-                <Link to={`${detailPath}/${id}`}>
+                <Link to={`${detailPath}/${userId}`}>
                   <dd className="dd01">
                     <img
                       src={
@@ -66,7 +66,7 @@ const RankingList: React.FC<RankingListProps> = (props) => {
           } else {
             return (
               <dl className="i-list-t" key={idx}>
-                <Link to={`${detailPath}/${id}`}>
+                <Link to={`${detailPath}/${userId}`}>
                   <dd className="dd01">{idx + 1}</dd>
                   <dt>
                     {realname}
