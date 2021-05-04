@@ -47,14 +47,14 @@ const CheckOrder: React.FC<CheckOrderProps> = (props) => {
   };
 
   // 获取用户信息
-  const gettUserInfo = (cb: (userInfo: any) => void) => {
+  const getUserInfo = (cb: (userInfo: any) => void) => {
     setUserInfoLoading(true);
     requestUserInfo(token)
       .then((res) => {
         if (res.data.code === 0) {
           const _userInfo = res.data.result;
-          window.localStorage.setItem("userInfo", JSON.stringify(_userInfo));
           dispatch(setUserInfo(_userInfo));
+          window.localStorage.setItem("userInfo", JSON.stringify(_userInfo));
           cb && cb(_userInfo);
         } else {
           dispatch(
@@ -109,7 +109,7 @@ const CheckOrder: React.FC<CheckOrderProps> = (props) => {
     if (subscribeLoading) {
       return;
     }
-    gettUserInfo((userInfo: any) => {
+    getUserInfo((userInfo: any) => {
       const { balance, integral } = userInfo;
       if (total - balance > 0) {
         dispatch(
