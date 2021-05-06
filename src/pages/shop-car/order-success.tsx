@@ -2,16 +2,23 @@ import React, { useState, useEffect } from "react";
 import { RouteChildrenProps } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/index";
-import { setTipsBoxVisible, setTipsBoxConfig } from "../../store/globalSlice";
+import {
+  setTipsBoxVisible,
+  setTipsBoxConfig,
+  setUserInfo,
+} from "../../store/globalSlice";
 import dayjs from "dayjs";
 import { OrderMap } from "./data";
+import { requestUserInfo } from "./service";
 import { requestAdConfigInfo } from "../../service";
 
 interface OrderSuccessProps extends RouteChildrenProps {}
 
 const OrderSuccess: React.FC<OrderSuccessProps> = (props) => {
   const { history } = props;
-  const { isLogin, userInfo } = useSelector((state: RootState) => state.global);
+  const { token, isLogin, userInfo } = useSelector(
+    (state: RootState) => state.global
+  );
   const dispatch = useDispatch();
 
   const [total, setTotal] = useState<number>(0); // 总价
@@ -36,6 +43,17 @@ const OrderSuccess: React.FC<OrderSuccessProps> = (props) => {
       dataIndex: "dayAmount",
       unit: "积分",
     },
+  };
+
+  // 获取用户信息
+  const getUserInfo = () => {
+    requestUserInfo(token).then((res) => {
+      if (res.data.code === 0) {
+        const userInfo = res.data.result;
+        dispatch(setUserInfo(userInfo));
+        window.localStorage.setItem("userInfo", JSON.stringify(userInfo));
+      }
+    });
   };
 
   const getAdConfigInfo = (cb: (result: any) => void) => {
@@ -64,6 +82,7 @@ const OrderSuccess: React.FC<OrderSuccessProps> = (props) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
+      getUserInfo()
       return;
     }
     dispatch(

@@ -125,7 +125,9 @@ const RecommendDetail: React.FC<RecommendDetailProps> = (props) => {
   const getMemberInfo = () => {
     requestMemberInfo(token).then((res) => {
       if (res.data.code === 0) {
-        dispatch(setUserInfo(res.data.result));
+        const userInfo = res.data.result;
+        dispatch(setUserInfo(userInfo));
+        window.localStorage.setItem("userInfo", JSON.stringify(userInfo));
       }
     });
   };

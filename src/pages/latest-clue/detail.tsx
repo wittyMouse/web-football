@@ -129,7 +129,9 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
   const getMemberInfo = () => {
     requestUserInfo(token).then((res) => {
       if (res.data.code === 0) {
-        dispatch(setUserInfo(res.data.result));
+        const userInfo = res.data.result;
+        dispatch(setUserInfo(userInfo));
+        window.localStorage.setItem("userInfo", JSON.stringify(userInfo));
       }
     });
   };
@@ -141,6 +143,7 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
       .then((res) => {
         if (res.data.code === 0) {
           getArticleInfo({ token, articleId: id });
+          getMemberInfo()
         } else {
         }
       })
