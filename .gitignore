@@ -11,6 +11,7 @@
 # production
 /build
 /football
+/test-football
 
 # misc
 .DS_Store
