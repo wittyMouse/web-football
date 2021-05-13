@@ -165,10 +165,22 @@ a {
   box-shadow: 0 0 8px #000;
   border-radius: 6px;
 }
+.ff02k {
+  width: 700px;
+  height: 376px;
+  background: #fff;
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px #000;
+  border-radius: 6px;
+}
 .ff03 {
-  width: 638px;
-  /* height: 668px; */
-  height: 588px;
+  width: 720px;
+  height: 560px;
   background: #fff;
   position: fixed;
   z-index: 100;
@@ -2017,7 +2029,7 @@ input:-ms-input-placeholder {
   color: #fff;
 }
 .reg-table {
-  width: 608px;
+  width: 720px;
   margin: 0 auto;
   font-size: 12px;
 }
@@ -2038,11 +2050,8 @@ input:-ms-input-placeholder {
   height: 36px;
   line-height: 36px;
   color: #888;
-  /* text-indent: 8px; */
   border: 1px solid #ddd;
-  -moz-border-radius: 4px;
-  -webkit-border-radius: 4px;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 .mark-bg {
   position: fixed;
@@ -2164,6 +2173,9 @@ input:-ms-input-placeholder {
 }
 .xy {
   font-size: 12px;
+  height: 66px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .news-nav {
   margin: 0 8px;
@@ -2314,6 +2326,57 @@ input:-ms-input-placeholder {
   line-height: 60px;
   color: #e00;
   padding-bottom: 10px;
+}
+
+.wx-reg {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  height: 440px;
+  border-radius: 10px;
+  margin: 0 20px;
+  padding: 30px 12px 0;
+  text-align: center;
+}
+.wx-reg img {
+  margin: 0 auto;
+  display: block;
+}
+.wx-reg p {
+  padding: 10px 0 16px;
+  color: #f50;
+  font-weight: bold;
+  font-size: 14px;
+}
+.login-img {
+  border-radius: 10px;
+  margin: 0 20px 0 0;
+  border: 1px solid #ddd;
+  padding: 25px 0;
+  background-color: #f9f9f9;
+}
+.login-img-title {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  color: #090;
+}
+/* .login-img img {
+  display: block;
+  margin: 10px auto 0;
+} */
+#wechat-bind iframe,
+#wechat-login iframe {
+  width: 100%;
+  height: 210px;
+}
+.kbwx {
+  text-align: center;
+  font-size: 16px;
+  line-height: 24px;
+}
+.kbwx img {
+  margin: 0 auto;
+  display: block;
 }
 
 .basic-table {

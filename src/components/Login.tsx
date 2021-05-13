@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
+import { useLocation } from "react-router-dom";
 import {
   setLoginBoxVisible,
   setRegisterBoxVisible,
   setTipsBoxVisible,
   setTipsBoxConfig,
+  setWeChartBoxVisible
 } from "../store/globalSlice";
 import { changeLoginStatus } from "../store/globalSlice";
 import {
@@ -29,10 +31,10 @@ const Login: React.FC<LoginProps> = () => {
   const [checkKey, setCheckKey] = useState<string>("");
   const [captcha, setCaptcha] = useState<string>("");
   const [captchaLoading, setCaptchaLoading] = useState<boolean>(false);
-  const [loginFormData, setLoginFormData] = useState<LoginFormData>(
-    initLoginFormData
-  );
+  const [loginFormData, setLoginFormData] =
+    useState<LoginFormData>(initLoginFormData);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const location = useLocation();
 
   /**
    * 获取验证码
@@ -76,14 +78,26 @@ const Login: React.FC<LoginProps> = () => {
                   isLogin: true,
                 })
               );
-              dispatch(
-                setTipsBoxConfig({
-                  type: "success",
-                  title: "操作成功",
-                  content: "登录成功",
-                })
-              );
-              dispatch(setTipsBoxVisible(true));
+              if (!userInfo.existOpenId) {
+                dispatch(setWeChartBoxVisible(true));
+              } else {
+                dispatch(
+                  setTipsBoxConfig({
+                    type: "success",
+                    title: "操作成功",
+                    content: "登录成功",
+                  })
+                );
+                dispatch(setTipsBoxVisible(true));
+              }
+              // dispatch(
+              //   setTipsBoxConfig({
+              //     type: "success",
+              //     title: "操作成功",
+              //     content: "登录成功",
+              //   })
+              // );
+              // dispatch(setTipsBoxVisible(true));
             } else {
               dispatch(
                 setTipsBoxConfig({
@@ -238,6 +252,35 @@ const Login: React.FC<LoginProps> = () => {
     login(params);
   };
 
+  const wechatRef = useCallback((el) => {
+    if (el !== null) {
+      wechatInit(el);
+    }
+  }, []);
+
+  const wechatInit = (el: Element) => {
+    const redirectUrl = `${window.location.origin}${window.location.pathname}#/redirect`;
+    const callbackUrl = location.pathname + location.search;
+    const cssHref = `${window.location.origin}${
+      window.location.pathname
+    }wechat-qrcode.css?timestramp=${Date.now()}`;
+    const stateText = `url=${callbackUrl}&target=login`
+    let state = "";
+    for (let i = 0; i < stateText.length; i++) {
+      state += stateText.charCodeAt(i).toString(16);
+    }
+    new WxLogin({
+      self_redirect: false,
+      id: "wechat-login",
+      appid: "wx81b6bd583b6a9ddd",
+      scope: "snsapi_login",
+      redirect_uri: encodeURIComponent(redirectUrl),
+      state,
+      style: "block",
+      href: encodeURIComponent(cssHref),
+    });
+  };
+
   useEffect(() => {
     window.document.body.style.position = "relative";
     window.document.body.style.width = "calc(100% - 17px)";
@@ -254,154 +297,170 @@ const Login: React.FC<LoginProps> = () => {
 
   return (
     <div>
-      <div className="ff02">
+      <div className="ff02k">
         <div className="close cursor-pointer" onClick={onClose}>
           <img src={require("../assets/images/icon-16.gif").default} alt="" />
         </div>
         <h1 className="member-l-title">会员登录</h1>
-
-        <div className="login-table">
-          <form onSubmit={onSubmit} autoComplete="off">
-            <table className="basic-table" style={{ width: "266px" }}>
-              <tbody>
-                <tr>
-                  <td valign="top" height="48">
-                    <input
-                      type="text"
-                      name="account"
-                      className="m-yh m-input"
-                      placeholder="会员账号"
-                      value={loginFormData.account}
-                      onChange={onFieldsChange}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top" height="44">
-                    <input
-                      type="password"
-                      name="pwd"
-                      className="m-ma m-input"
-                      placeholder="登录密码"
-                      value={loginFormData.pwd}
-                      onChange={onFieldsChange}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td height="48">
+        <table className="basic-table" style={{ width: "700px" }}>
+          <tbody>
+            <tr>
+              <td width="408">
+                <div className="login-table">
+                  <form onSubmit={onSubmit} autoComplete="off">
                     <table className="basic-table" style={{ width: "266px" }}>
                       <tbody>
                         <tr>
-                          <td width="65">
+                          <td valign="top" height="48">
                             <input
                               type="text"
-                              name="captcha"
-                              className="l-inp-bg03"
-                              value={loginFormData.captcha}
+                              name="account"
+                              className="m-yh m-input"
+                              placeholder="会员账号"
+                              value={loginFormData.account}
                               onChange={onFieldsChange}
                             />
                           </td>
-                          <td width="77">
-                            {captchaLoading ? (
-                              <div className="captcha-loading">
-                                <img
-                                  src={
-                                    require("../assets/images/loading.svg")
-                                      .default
-                                  }
-                                  alt=""
-                                />
-                              </div>
-                            ) : (
-                              <img
-                                className="captcha"
-                                src={captcha}
-                                alt="验证码"
-                              />
-                            )}
+                        </tr>
+                        <tr>
+                          <td valign="top" height="44">
+                            <input
+                              type="password"
+                              name="pwd"
+                              className="m-ma m-input"
+                              placeholder="登录密码"
+                              value={loginFormData.pwd}
+                              onChange={onFieldsChange}
+                            />
                           </td>
-                          <td width="124">
-                            看不清？
-                            <span
-                              className="f2 cursor-pointer"
-                              onClick={onGetCaptcha}
+                        </tr>
+                        <tr>
+                          <td height="48">
+                            <table
+                              className="basic-table"
+                              style={{ width: "266px" }}
                             >
-                              点击更换
+                              <tbody>
+                                <tr>
+                                  <td width="65">
+                                    <input
+                                      type="text"
+                                      name="captcha"
+                                      className="l-inp-bg03"
+                                      value={loginFormData.captcha}
+                                      onChange={onFieldsChange}
+                                    />
+                                  </td>
+                                  <td width="77">
+                                    {captchaLoading ? (
+                                      <div className="captcha-loading">
+                                        <img
+                                          src={
+                                            require("../assets/images/loading.svg")
+                                              .default
+                                          }
+                                          alt=""
+                                        />
+                                      </div>
+                                    ) : (
+                                      <img
+                                        className="captcha"
+                                        src={captcha}
+                                        alt="验证码"
+                                      />
+                                    )}
+                                  </td>
+                                  <td width="124">
+                                    看不清？
+                                    <span
+                                      className="f2 cursor-pointer"
+                                      onClick={onGetCaptcha}
+                                    >
+                                      点击更换
+                                    </span>
+                                    {/* <span className="fc1 cursor-pointer">点击更换</span> */}
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td height="52" className="yx-label">
+                            有效期：
+                            <label>
+                              <input
+                                type="radio"
+                                name="type"
+                                value={2}
+                                checked={loginFormData.type === 2}
+                                onChange={onFieldsChange}
+                              />
+                              一个月
+                            </label>
+                            <label>
+                              <input
+                                type="radio"
+                                name="type"
+                                value={1}
+                                checked={loginFormData.type === 1}
+                                onChange={onFieldsChange}
+                              />
+                              一周
+                            </label>
+                            <label>
+                              <input
+                                type="radio"
+                                name="type"
+                                value={0}
+                                checked={loginFormData.type === 0}
+                                onChange={onFieldsChange}
+                              />
+                              一天
+                            </label>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" className="p-r">
+                            <div className="forget">
+                              <span
+                                className="cursor-pointer"
+                                onClick={onForGotPassword}
+                              >
+                                忘记密码？
+                              </span>
+                            </div>
+                            <input
+                              type="submit"
+                              value="确定提交"
+                              className="m-buttton cursor-pointer"
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td height="72" align="center">
+                            <span
+                              className="reg-t-b cursor-pointer"
+                              onClick={onRegister}
+                            >
+                              立即注册，享受巅峰！
                             </span>
-                            {/* <span className="fc1 cursor-pointer">点击更换</span> */}
                           </td>
                         </tr>
                       </tbody>
                     </table>
-                  </td>
-                </tr>
-                <tr>
-                  <td height="52" className="yx-label">
-                    有效期：
-                    <label>
-                      <input
-                        type="radio"
-                        name="type"
-                        value={2}
-                        checked={loginFormData.type === 2}
-                        onChange={onFieldsChange}
-                      />
-                      一个月
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="type"
-                        value={1}
-                        checked={loginFormData.type === 1}
-                        onChange={onFieldsChange}
-                      />
-                      一周
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="type"
-                        value={0}
-                        checked={loginFormData.type === 0}
-                        onChange={onFieldsChange}
-                      />
-                      一天
-                    </label>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" className="p-r">
-                    <div className="forget">
-                      <span
-                        className="cursor-pointer"
-                        onClick={onForGotPassword}
-                      >
-                        忘记密码？
-                      </span>
-                    </div>
-                    <input
-                      type="submit"
-                      value="确定提交"
-                      className="m-buttton cursor-pointer"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td height="72" align="center">
-                    <span
-                      className="reg-t-b cursor-pointer"
-                      onClick={onRegister}
-                    >
-                      立即注册，享受巅峰！
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </form>
-        </div>
+                  </form>
+                </div>
+              </td>
+              <td width="292">
+                <div className="login-img">
+                  <div className="login-img-title">微信扫码快速登录</div>
+                  <div id="wechat-login" ref={wechatRef}></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div className="mark-bg"></div>
     </div>

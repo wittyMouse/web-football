@@ -31,6 +31,7 @@ interface TipsBoxConfig {
 interface GlobalState extends loginState {
   loginBoxVisible: boolean;
   registerBoxVisible: boolean;
+  weChartBoxVisible: boolean;
   tipsBoxVisible: boolean;
   tipsBoxConfig: TipsBoxConfig;
 }
@@ -41,6 +42,7 @@ const initialState: GlobalState = {
   isLogin: false,
   loginBoxVisible: false,
   registerBoxVisible: false,
+  weChartBoxVisible: false,
   tipsBoxVisible: false,
   tipsBoxConfig: {
     type: "",
@@ -74,6 +76,9 @@ const globalSlice = createSlice({
     setRegisterBoxVisible(state, action: PayloadAction<boolean>) {
       state.registerBoxVisible = action.payload;
     },
+    setWeChartBoxVisible(state, action: PayloadAction<boolean>) {
+      state.weChartBoxVisible = action.payload;
+    },
     setTipsBoxVisible(state, action: PayloadAction<boolean>) {
       state.tipsBoxVisible = action.payload;
     },
@@ -90,6 +95,7 @@ export const {
   changeLoginStatus,
   setLoginBoxVisible,
   setRegisterBoxVisible,
+  setWeChartBoxVisible,
   setTipsBoxVisible,
   setTipsBoxConfig,
 } = globalSlice.actions;

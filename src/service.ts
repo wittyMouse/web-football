@@ -313,3 +313,37 @@ export function requestAdConfigInfo() {
 //     data: params,
 //   });
 // }
+
+/**
+ * 获取登录二维码随机数
+ */
+export function requestLoginQRCode() {
+  return request({
+    url: "/api/member/getLoginQRCode",
+    method: "post",
+  });
+}
+
+/**
+ * 根据二维码进行登录
+ * @param data
+ */
+export function requestLoginByQRCode(data: any) {
+  return request({
+    url: "/api/member/loginByQRCode",
+    method: "post",
+    data,
+  });
+}
+
+/**
+ * 会员根据 CODE（公众号）绑定 OpenId
+ * @param data
+ */
+export function requestBindingOpenIdByCode(data: any) {
+  return request({
+    url: "/api/member/bindingOpenIdByCode",
+    method: "post",
+    data,
+  });
+}

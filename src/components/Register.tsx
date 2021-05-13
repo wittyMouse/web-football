@@ -94,7 +94,15 @@ const Register: React.FC<RegisterProps> = () => {
         if (res.data.code === 0) {
           cb && cb();
         } else {
-          console.error(res.data.message);
+          dispatch(
+            setTipsBoxConfig({
+              type: "error",
+              title: "操作失败",
+              content: res.data.message,
+            })
+          );
+          dispatch(setTipsBoxVisible(true));
+          onCaptchaModalClose();
         }
       })
       .finally(() => {
@@ -435,32 +443,40 @@ const Register: React.FC<RegisterProps> = () => {
         <h1 className="member-l-title">注册会员</h1>
         <div className="reg-table">
           <form onSubmit={onSubmit} autoComplete="off">
-            <table className="basic-table" style={{ width: "608px" }}>
+            <table className="basic-table" style={{ width: "720px" }}>
               <tbody>
                 <tr>
-                  <td height="40" colSpan={3} align="center">
-                    (带 *
-                    号的表示为必填项目，用户名必须大于3位小于20位，密码必须大于3位)
-                  </td>
-                </tr>
-                <tr>
-                  <td width="113" height="40" align="right">
-                    会员名称&nbsp;&nbsp;&nbsp;
-                  </td>
-                  <td width="206">
-                    <input
-                      type="text"
-                      name="account"
-                      value={registerFormData.account}
-                      onChange={onFieldsChange}
-                    />
-                  </td>
-                  <td width="289">
-                    <b className="fc1">*</b>{" "}
-                    (可以使用中文，但禁止除[@][.]以外的特殊符号)
-                  </td>
-                </tr>
-                {/* <tr>
+                  <td>
+                    <table className="basic-table">
+                      <tbody>
+                        <tr>
+                          <td height="40" colSpan={2} align="center">
+                            (带 *
+                            号的表示为必填项目，会员名称必须大于3位小于20位，密码必须大于3位)
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="130" height="40" align="right">
+                            会员名称&nbsp;&nbsp;&nbsp;
+                          </td>
+                          <td width="317">
+                            <input
+                              type="text"
+                              name="account"
+                              value={registerFormData.account}
+                              onChange={onFieldsChange}
+                            />
+                            &nbsp;
+                            <b className="fc1">*</b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td height="30" align="right">
+                            &nbsp;
+                          </td>
+                          <td>可用中文，但禁止除[@][.]以外的特殊符号</td>
+                        </tr>
+                        {/* <tr>
                   <td height="40" align="right">
                     昵　　称&nbsp;&nbsp;&nbsp;
                   </td>
@@ -476,39 +492,37 @@ const Register: React.FC<RegisterProps> = () => {
                     <b className="fc1">*</b>
                   </td>
                 </tr> */}
-                <tr>
-                  <td height="40" align="right">
-                    登录密码&nbsp;&nbsp;&nbsp;
-                  </td>
-                  <td>
-                    <input
-                      type="password"
-                      name="pwd"
-                      value={registerFormData.pwd}
-                      onChange={onFieldsChange}
-                    />
-                  </td>
-                  <td className="f12">
-                    <b className="fc1">*</b>
-                  </td>
-                </tr>
-                <tr>
-                  <td height="40" align="right">
-                    确定密码&nbsp;&nbsp;&nbsp;
-                  </td>
-                  <td>
-                    <input
-                      type="password"
-                      name="confirmPwd"
-                      value={registerFormData.confirmPwd}
-                      onChange={onFieldsChange}
-                    />
-                  </td>
-                  <td className="f12">
-                    <b className="fc1">*</b>
-                  </td>
-                </tr>
-                {/* <tr>
+                        <tr>
+                          <td height="40" align="right">
+                            登录密码&nbsp;&nbsp;&nbsp;
+                          </td>
+                          <td>
+                            <input
+                              type="password"
+                              name="pwd"
+                              value={registerFormData.pwd}
+                              onChange={onFieldsChange}
+                            />
+                            &nbsp;
+                            <b className="fc1">*</b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td height="40" align="right">
+                            确定密码&nbsp;&nbsp;&nbsp;
+                          </td>
+                          <td>
+                            <input
+                              type="password"
+                              name="confirmPwd"
+                              value={registerFormData.confirmPwd}
+                              onChange={onFieldsChange}
+                            />
+                            &nbsp;
+                            <b className="fc1">*</b>
+                          </td>
+                        </tr>
+                        {/* <tr>
                   <td height="40" align="right">
                     验证码&nbsp;&nbsp;&nbsp;
                   </td>
@@ -558,19 +572,33 @@ const Register: React.FC<RegisterProps> = () => {
                     </table>
                   </td>
                 </tr> */}
-                <tr>
-                  <td height="40" align="right">
-                    手机号码&nbsp;&nbsp;&nbsp;
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      name="mobile"
-                      value={registerFormData.mobile}
-                      onChange={onFieldsChange}
-                    />
-                  </td>
-                  <td className="f12" style={{ lineHeight: "36px" }}>
+                        <tr>
+                          <td height="40" align="right">
+                            手机号码&nbsp;&nbsp;&nbsp;
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              name="mobile"
+                              value={registerFormData.mobile}
+                              onChange={onFieldsChange}
+                            />
+                            <span
+                              className="f12"
+                              style={{ lineHeight: "36px" }}
+                            >
+                              &nbsp;
+                              <b className="fc1">*</b>&nbsp;&nbsp;&nbsp;
+                              <span
+                                className="p-yzm cursor-pointer"
+                                style={{ color: "#ff5500" }}
+                                onClick={onCaptchaModalShow}
+                              >
+                                获取手机验证码
+                              </span>
+                            </span>
+                          </td>
+                          {/* <td className="f12" style={{ lineHeight: "36px" }}>
                     <b className="fc1">*</b>
                     <span
                       className="p-yzm cursor-pointer"
@@ -578,88 +606,103 @@ const Register: React.FC<RegisterProps> = () => {
                     >
                       获取手机验证码
                     </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td height="40" align="right">
-                    短信验证码&nbsp;&nbsp;&nbsp;
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      name="verificationCode"
-                      value={registerFormData.verificationCode}
-                      onChange={onFieldsChange}
-                    />
-                  </td>
-                  <td className="f12">
-                    <b className="fc1">*</b>
-                  </td>
-                </tr>
-                <tr>
-                  <td height="40" align="right">
-                    哪个电台得知本站&nbsp;&nbsp;&nbsp;
-                  </td>
-                  <td>
-                    <select
-                      name="channelId"
-                      value={registerFormData.channelId}
-                      onChange={onFieldsChange}
-                    >
-                      <option value="">请选择</option>
-                      {channelList.map((item) => (
-                        <option value={item.channelId} key={item.channelId}>
-                          {item.channelName}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  {/* <td className="f12">
-                    <b className="fc1">*</b>
                   </td> */}
-                </tr>
-                <tr>
-                  <td height="40" align="right">
-                    会员协议&nbsp;&nbsp;&nbsp;
+                        </tr>
+                        <tr>
+                          <td height="40" align="right">
+                            短信验证码&nbsp;&nbsp;&nbsp;
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              name="verificationCode"
+                              value={registerFormData.verificationCode}
+                              onChange={onFieldsChange}
+                            />
+                            &nbsp;
+                            <b className="fc1">*</b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td height="40" align="right">
+                            得知渠道&nbsp;&nbsp;&nbsp;
+                          </td>
+                          <td>
+                            <select
+                              name="channelId"
+                              value={registerFormData.channelId}
+                              onChange={onFieldsChange}
+                            >
+                              <option value="">请选择</option>
+                              {channelList.map((item) => (
+                                <option
+                                  value={item.channelId}
+                                  key={item.channelId}
+                                >
+                                  {item.channelName}
+                                </option>
+                              ))}
+                            </select>
+                            &nbsp;
+                            <b className="fc1">*</b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td height="8" colSpan={2} align="right"></td>
+                        </tr>
+                        <tr>
+                          <td height="40" align="right">
+                            会员注册协议&nbsp;&nbsp;&nbsp;
+                          </td>
+                          <td>
+                            <div className="xy">
+                              1、在本站注册的会员，必须遵守《互联网电子公告服务管理规定》，不得在本站发表诽谤他人，侵犯他人隐私，侵犯他人知识产权，传播病毒，政治言论，商业讯息等信息。
+                              <br />
+                              2、在所有在本站发表的文章，本站都具有最终编辑权，并且保留用于印刷或向第三方发表的权利，如果你的资料不齐全，我们将有权不作任何通知使用你在本站发布的作品。
+                              <br />
+                              3、在登记过程中，您将选择注册名和密码。注册名的选择应遵守法律法规及社会公德。您必须对您的密码保密，您将对您注册名和密码下发生的所有活动承担责任。
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td height="40">&nbsp;</td>
+                          <td>
+                            <label>
+                              <input
+                                style={{ verticalAlign: "middle" }}
+                                type="checkbox"
+                                name="field3"
+                                checked={registerFormData.field3}
+                                onChange={onFieldsChange}
+                              />
+                              &nbsp;我已阅读并完全接受服务协议
+                            </label>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td height="80" colSpan={2} align="center">
+                            <input
+                              type="submit"
+                              value="确定提交"
+                              className="m-buttton cursor-pointer"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </td>
-                  <td colSpan={2}>
-                    <div className="xy">
-                      会员注册协议： <br />
-                      1、在本站注册的会员，必须遵守《互联网电子公告服务管理规定》，不得在本站发表诽谤他人，侵犯他人隐私，侵犯他人知识产权，传播病毒，政治言论，商业讯息等信息。
-                      <br />
-                      2、在所有在本站发表的文章，本站都具有最终编辑权，并且保留用于印刷或向第三方发表的权利，如果你的资料不齐全，我们将有权不作任何通知使用你在本站发布的作品。
-                      <br />
-                      3、在登记过程中，您将选择注册名和密码。注册名的选择应遵守法律法规及社会公德。您必须对您的密码保密，您将对您注册名和密码下发生的所有活动承担责任。
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td height="40">&nbsp;</td>
-                  <td colSpan={2}>
-                    <label>
-                      <input
-                        style={{ verticalAlign: "middle" }}
-                        type="checkbox"
-                        name="field3"
-                        checked={registerFormData.field3}
-                        onChange={onFieldsChange}
+                  <td width="273">
+                    <div className="wx-reg">
+                      <img
+                        src={require("../assets/images/wx-reg.gif").default}
+                        alt=""
                       />
-                      &nbsp;我已阅读并完全接受服务协议
-                    </label>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    height="100"
-                    colSpan={3}
-                    align="center"
-                    style={{ borderTop: "1px solid #dddddd" }}
-                  >
-                    <input
-                      type="submit"
-                      value="确定提交"
-                      className="m-buttton cursor-pointer"
-                    />
+                      <p>微信扫码关注注册</p>
+                      <img
+                        src={require("../assets/images/wx-reg02.gif").default}
+                        alt=""
+                      />
+                    </div>
                   </td>
                 </tr>
               </tbody>
