@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/index";
-import { setUserInfo } from "../../store/globalSlice";
+import { setLoginBoxVisible, setUserInfo } from "../../store/globalSlice";
 import { RouteChildrenProps } from "react-router-dom";
 import RecommendList from "./components/RecommendList";
 import RankingList from "./components/RankingList";
@@ -16,6 +16,7 @@ import {
   requestMoreArticleList,
   requestArticleInfo,
   requestBuyArticle,
+  requestRankingList
 } from "./service";
 import { requestUserInfo, requestAdConfigInfo } from "../../service";
 
@@ -152,6 +153,11 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
       });
   };
 
+  // 点击登录按钮
+  const onLoginClick = () => {
+    dispatch(setLoginBoxVisible(true));
+  }
+
   // 点击购买按钮
   const onPayClick = (articleId: string) => {
     buyArticle(articleId);
@@ -174,7 +180,7 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
   const getRenderContent = () => {
     if (!isLogin) {
       // 未登录
-      return <LoginCard articleDetail={articleDetail} />;
+      return <LoginCard articleDetail={articleDetail} onLoginClick={onLoginClick} />;
     } else {
       if (articleDetail.isBuy) {
         // 已购买
@@ -220,6 +226,21 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
     });
   };
 
+  const getRankingList = (type: number, cb: (result: any) => void) => {
+    const data = {
+      type,
+      pageNo: 1,
+      pageSize: 10,
+    };
+    requestRankingList(data).then((res) => {
+      if (res.data.code === 0) {
+        cb && cb(res.data.result.records);
+      } else {
+        console.error(res.data.message);
+      }
+    });
+  };
+
   useEffect(() => {
     getAdConfigInfo((result) => {
       if (result) {
@@ -247,7 +268,11 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
         });
         getRecommendArticleList();
         // 预言家
-        getUserList("2", (result) => {
+        // getUserList("2", (result) => {
+        //   setUserList(result);
+        // });
+        // 劲爆贴士榜
+        getRankingList(1, (result) => {
           setUserList(result);
         });
       }
@@ -257,7 +282,11 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
       });
       getRecommendArticleList();
       // 预言家
-      getUserList("2", (result) => {
+      // getUserList("2", (result) => {
+      //   setUserList(result);
+      // });
+      // 劲爆贴士榜
+      getRankingList(1, (result) => {
         setUserList(result);
       });
     }
@@ -311,7 +340,7 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
             recommendList={recommendArticleList}
           />
 
-          <RankingList title="线人精准榜" userList={userList} />
+          <RankingList title="劲爆贴士榜" userList={userList} />
         </div>
       </div>
 

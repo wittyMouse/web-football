@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState, useEffect, useCallback } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../store/index";
+import { useLocation } from "react-router-dom";
 import {
   setRegisterBoxVisible,
   setTipsBoxVisible,
   setTipsBoxConfig,
+  setRegisterStatus,
+  changeLoginStatus,
 } from "../store/globalSlice";
 import {
   requestCaptcha,
-  requestRegister,
+  requestEditMemberInfo,
   requestPhoneCode,
   requestChannelList,
 } from "../service";
@@ -29,14 +33,14 @@ interface Channel {
 }
 
 const initRegisterFormData: RegisterFormData = {
-  account: "",
-  pwd: "",
-  confirmPwd: "",
+  // account: "",
+  // pwd: "",
+  // confirmPwd: "",
   mobile: "",
   // nickname: "",
   verificationCode: "",
   channelId: "",
-  field3: false,
+  // field3: false,
 };
 
 const initCaptchaFormData: CaptchaFormData = {
@@ -46,24 +50,23 @@ const initCaptchaFormData: CaptchaFormData = {
 
 const Register: React.FC<RegisterProps> = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const [captcha, setCaptcha] = useState<string>("");
   const [captchaLoading, setCaptchaLoading] = useState<boolean>(false);
-  const [registerFormData, setRegisterFormData] = useState<RegisterFormData>(
-    initRegisterFormData
-  );
+  const [registerFormData, setRegisterFormData] =
+    useState<RegisterFormData>(initRegisterFormData);
   const [submitting, setSubmitting] = useState<boolean>(false);
 
-  const [captchaModalVisible, setCaptchaModalVisible] = useState<boolean>(
-    false
-  );
+  const [captchaModalVisible, setCaptchaModalVisible] =
+    useState<boolean>(false);
 
-  const [captchaFormData, setCaptchaFormData] = useState<CaptchaFormData>(
-    initCaptchaFormData
-  );
+  const [captchaFormData, setCaptchaFormData] =
+    useState<CaptchaFormData>(initCaptchaFormData);
 
   const [phoneCodeLoading, setPhoneCodeLoading] = useState<boolean>(false);
   const [channelListLoading, setChannelListLoading] = useState<boolean>(false);
   const [channelList, setChannelList] = useState<Channel[]>([]);
+  const { registerStatus } = useSelector((state: RootState) => state.global);
 
   /**
    * 获取验证码
@@ -133,19 +136,34 @@ const Register: React.FC<RegisterProps> = () => {
    * @param params
    */
   const register = (params: RegisterParams) => {
+    const token = window.sessionStorage.getItem("register-token") as string;
     setSubmitting(true);
-    requestRegister(params)
+    requestEditMemberInfo({ ...params, token })
       .then((res) => {
         if (res.data.code === 0) {
-          dispatch(
-            setTipsBoxConfig({
-              type: "success",
-              title: "操作成功",
-              content: "您已成功注册本站会员！",
-            })
+          // dispatch(
+          //   setTipsBoxConfig({
+          //     type: "success",
+          //     title: "操作成功",
+          //     content: "您已成功注册本站会员！",
+          //   })
+          // );
+          // dispatch(setTipsBoxVisible(true));
+          const userInfo = JSON.parse(
+            window.sessionStorage.getItem("register-userInfo") as string
           );
-          dispatch(setTipsBoxVisible(true));
+
+          dispatch(changeLoginStatus({
+            token,
+            userInfo,
+            isLogin: true,
+          }));
+
+          window.sessionStorage.removeItem("register-token");
+          window.sessionStorage.removeItem("register-userInfo");
+          dispatch(setRegisterStatus(3));
         } else {
+          dispatch(setRegisterBoxVisible(false));
           dispatch(
             setTipsBoxConfig({
               type: "error",
@@ -158,7 +176,6 @@ const Register: React.FC<RegisterProps> = () => {
       })
       .finally(() => {
         setSubmitting(false);
-        dispatch(setRegisterBoxVisible(false));
       });
   };
 
@@ -166,6 +183,39 @@ const Register: React.FC<RegisterProps> = () => {
    * 关闭弹窗
    */
   const onClose = () => {
+    dispatch(setRegisterBoxVisible(false));
+  };
+
+  const wechatRef = useCallback((el) => {
+    if (el !== null) {
+      wechatInit(el);
+    }
+  }, []);
+
+  const wechatInit = (el: Element) => {
+    const redirectUrl = `${window.location.origin}${window.location.pathname}#/redirect`;
+    const callbackUrl = location.pathname + location.search;
+    const cssHref = `${window.location.origin}${
+      window.location.pathname
+    }wechat-qrcode.css?timestramp=${Date.now()}`;
+    const stateText = `url=${callbackUrl}&target=login`;
+    let state = "";
+    for (let i = 0; i < stateText.length; i++) {
+      state += stateText.charCodeAt(i).toString(16);
+    }
+    new WxLogin({
+      self_redirect: false,
+      id: "wechat-register",
+      appid: "wx81b6bd583b6a9ddd",
+      scope: "snsapi_login",
+      redirect_uri: encodeURIComponent(redirectUrl),
+      state,
+      style: "block",
+      href: encodeURIComponent(cssHref),
+    });
+  };
+
+  const onBackClick = () => {
     dispatch(setRegisterBoxVisible(false));
   };
 
@@ -297,87 +347,119 @@ const Register: React.FC<RegisterProps> = () => {
       return;
     }
 
-    const regExp = /^[\u4e00-\u9fa5]+$/;
+    // const regExp = /^[\u4e00-\u9fa5]+$/;
 
-    if (!registerFormData.account) {
-      dispatch(
-        setTipsBoxConfig({
-          type: "warning",
-          title: "提示",
-          content: "请输入会员名称",
-        })
-      );
-      dispatch(setTipsBoxVisible(true));
-      return;
-    } else if (
-      (regExp.test(registerFormData.account) &&
-        registerFormData.account.length < 2) ||
-      (!regExp.test(registerFormData.account) &&
-        registerFormData.account.length < 4) ||
-      registerFormData.account.length > 20
-    ) {
-      dispatch(
-        setTipsBoxConfig({
-          type: "warning",
-          title: "提示",
-          content: "用户名必须大于3位小于20位",
-        })
-      );
-      dispatch(setTipsBoxVisible(true));
-      return;
-    } else if (
-      !/^[a-zA-Z0-9@.\u4e00-\u9fa5]+$/g.test(registerFormData.account)
-    ) {
-      dispatch(
-        setTipsBoxConfig({
-          type: "warning",
-          title: "提示",
-          content: "用户名不能为特殊字符",
-        })
-      );
-      dispatch(setTipsBoxVisible(true));
-      return;
-    } else if (!registerFormData.pwd) {
-      dispatch(
-        setTipsBoxConfig({
-          type: "warning",
-          title: "提示",
-          content: "请输入登录密码",
-        })
-      );
-      dispatch(setTipsBoxVisible(true));
-      return;
-    } else if (registerFormData.pwd.length < 4) {
-      dispatch(
-        setTipsBoxConfig({
-          type: "warning",
-          title: "提示",
-          content: "密码必须大于3位",
-        })
-      );
-      dispatch(setTipsBoxVisible(true));
-      return;
-    } else if (!registerFormData.confirmPwd) {
-      dispatch(
-        setTipsBoxConfig({
-          type: "warning",
-          title: "提示",
-          content: "请输入确认密码",
-        })
-      );
-      dispatch(setTipsBoxVisible(true));
-      return;
-    } else if (registerFormData.pwd !== registerFormData.confirmPwd) {
-      dispatch(
-        setTipsBoxConfig({
-          type: "warning",
-          title: "提示",
-          content: "两次输入的密码不一致",
-        })
-      );
-      dispatch(setTipsBoxVisible(true));
-      return;
-    } else if (!registerFormData.mobile) {
+    // if (!registerFormData.account) {
+    //   dispatch(
+    //     setTipsBoxConfig({
+    //       type: "warning",
+    //       title: "提示",
+    //       content: "请输入会员名称",
+    //     })
+    //   );
+    //   dispatch(setTipsBoxVisible(true));
+    //   return;
+    // } else if (
+    //   (regExp.test(registerFormData.account) &&
+    //     registerFormData.account.length < 2) ||
+    //   (!regExp.test(registerFormData.account) &&
+    //     registerFormData.account.length < 4) ||
+    //   registerFormData.account.length > 20
+    // ) {
+    //   dispatch(
+    //     setTipsBoxConfig({
+    //       type: "warning",
+    //       title: "提示",
+    //       content: "用户名必须大于3位小于20位",
+    //     })
+    //   );
+    //   dispatch(setTipsBoxVisible(true));
+    //   return;
+    // } else if (
+    //   !/^[a-zA-Z0-9@.\u4e00-\u9fa5]+$/g.test(registerFormData.account)
+    // ) {
+    //   dispatch(
+    //     setTipsBoxConfig({
+    //       type: "warning",
+    //       title: "提示",
+    //       content: "用户名不能为特殊字符",
+    //     })
+    //   );
+    //   dispatch(setTipsBoxVisible(true));
+    //   return;
+    // } else if (!registerFormData.pwd) {
+    //   dispatch(
+    //     setTipsBoxConfig({
+    //       type: "warning",
+    //       title: "提示",
+    //       content: "请输入登录密码",
+    //     })
+    //   );
+    //   dispatch(setTipsBoxVisible(true));
+    //   return;
+    // } else if (registerFormData.pwd.length < 4) {
+    //   dispatch(
+    //     setTipsBoxConfig({
+    //       type: "warning",
+    //       title: "提示",
+    //       content: "密码必须大于3位",
+    //     })
+    //   );
+    //   dispatch(setTipsBoxVisible(true));
+    //   return;
+    // } else if (!registerFormData.confirmPwd) {
+    //   dispatch(
+    //     setTipsBoxConfig({
+    //       type: "warning",
+    //       title: "提示",
+    //       content: "请输入确认密码",
+    //     })
+    //   );
+    //   dispatch(setTipsBoxVisible(true));
+    //   return;
+    // } else if (registerFormData.pwd !== registerFormData.confirmPwd) {
+    //   dispatch(
+    //     setTipsBoxConfig({
+    //       type: "warning",
+    //       title: "提示",
+    //       content: "两次输入的密码不一致",
+    //     })
+    //   );
+    //   dispatch(setTipsBoxVisible(true));
+    //   return;
+    // } else if (!registerFormData.mobile) {
+    //   dispatch(
+    //     setTipsBoxConfig({
+    //       type: "warning",
+    //       title: "提示",
+    //       content: "请输入手机号",
+    //     })
+    //   );
+    //   dispatch(setTipsBoxVisible(true));
+    //   return;
+    // } else if (!registerFormData.verificationCode) {
+    //   dispatch(
+    //     setTipsBoxConfig({
+    //       type: "warning",
+    //       title: "提示",
+    //       content: "请输入验证码",
+    //     })
+    //   );
+    //   dispatch(setTipsBoxVisible(true));
+    //   return;
+    // } else if (!registerFormData.field3) {
+    //   dispatch(
+    //     setTipsBoxConfig({
+    //       type: "warning",
+    //       title: "提示",
+    //       content: "请先接受服务协议",
+    //     })
+    //   );
+    //   dispatch(setTipsBoxVisible(true));
+    //   return;
+    // }
+
+    if (!registerFormData.mobile) {
       dispatch(
         setTipsBoxConfig({
           type: "warning",
@@ -397,28 +479,165 @@ const Register: React.FC<RegisterProps> = () => {
       );
       dispatch(setTipsBoxVisible(true));
       return;
-    } else if (!registerFormData.field3) {
+    } else if (!registerFormData.channelId) {
       dispatch(
         setTipsBoxConfig({
           type: "warning",
           title: "提示",
-          content: "请先接受服务协议",
+          content: "请选择得知渠道",
         })
       );
       dispatch(setTipsBoxVisible(true));
       return;
     }
 
+    // const params: { [propName: string]: any } = {
+    //   nickname: registerFormData.account,
+    //   verificationKey: registerFormData.mobile,
+    // };
+    // Object.keys(registerFormData).forEach((key: string) => {
+    //   if (key !== "field3") {
+    //     params[key] = registerFormData[key];
+    //   }
+    // });
+
     const params: { [propName: string]: any } = {
-      nickname: registerFormData.account,
-      verificationKey: registerFormData.mobile,
+      ...registerFormData,
     };
-    Object.keys(registerFormData).forEach((key: string) => {
-      if (key !== "field3") {
-        params[key] = registerFormData[key];
-      }
-    });
     register(params as RegisterParams);
+  };
+
+  const registerRender = () => {
+    if (registerStatus === 1) {
+      // 扫码
+      return (
+        <div className="wx-reg2">
+          <img src={require("../assets/images/wx-reg.gif").default} alt="" />
+          <p>微信扫码关注注册</p>
+          <div id="wechat-register" ref={wechatRef}></div>
+        </div>
+      );
+    } else if (registerStatus === 2) {
+      // 填写信息
+      return (
+        <div className="wx-reg2">
+          <div className="reg-bz">
+            <ul>
+              <li className="seled">
+                <span>1</span>验证手机号
+              </li>
+              <li>
+                <span>2</span>注册成功
+              </li>
+            </ul>
+          </div>
+          <form onSubmit={onSubmit} autoComplete="off">
+            <table className="basic-table reg-table2">
+              <tbody>
+                <tr>
+                  <td width="92" height="40" align="right">
+                    手机号码&nbsp;&nbsp;&nbsp;
+                  </td>
+                  <td align="left">
+                    <input
+                      type="text"
+                      name="mobile"
+                      value={registerFormData.mobile}
+                      onChange={onFieldsChange}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td height="40" align="right">
+                    短信验证码&nbsp;&nbsp;&nbsp;
+                  </td>
+                  <td align="left">
+                    <input
+                      style={{ width: "100px" }}
+                      type="text"
+                      placeholder="输入验证码"
+                      name="verificationCode"
+                      value={registerFormData.verificationCode}
+                      onChange={onFieldsChange}
+                    />
+                    <span className="f12" style={{ lineHeight: "36px" }}>
+                      &nbsp;&nbsp;
+                      <span
+                        className="p-yzm cursor-pointer"
+                        style={{ color: "#ff5500" }}
+                        onClick={onCaptchaModalShow}
+                      >
+                        获取手机验证码
+                      </span>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td height="40" align="right">
+                    得知渠道&nbsp;&nbsp;&nbsp;
+                  </td>
+                  <td align="left">
+                    <select
+                      name="channelId"
+                      value={registerFormData.channelId}
+                      onChange={onFieldsChange}
+                    >
+                      <option value="">请选择</option>
+                      {channelList.map((item) => (
+                        <option value={item.channelId} key={item.channelId}>
+                          {item.channelName}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td height="8" colSpan={2} align="right"></td>
+                </tr>
+                <tr>
+                  <td height="80" colSpan={2} align="center">
+                    <input
+                      type="submit"
+                      value="确定提交"
+                      className="m-buttton cursor-pointer"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </form>
+        </div>
+      );
+    } else if (registerStatus === 3) {
+      // 成功
+      return (
+        <div className="wx-reg2">
+          <div className="reg-bz">
+            <ul>
+              <li className="seled">
+                <span>1</span>验证手机号
+              </li>
+              <li className="seled">
+                <span>2</span>注册成功
+              </li>
+            </ul>
+          </div>
+          <div className="reg-suc">
+            <img src={require("../assets/images/icon-15.gif").default} alt="" />
+            <h2>注册成功</h2>
+            <p>已自动登录</p>
+            <div>
+              <input
+                className="m-buttton cursor-pointer"
+                type="button"
+                value="确定提交"
+                onClick={onBackClick}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
   };
 
   useEffect(() => {
@@ -436,279 +655,12 @@ const Register: React.FC<RegisterProps> = () => {
 
   return (
     <div>
-      <div className="ff03">
+      <div className="ff06">
         <div className="close cursor-pointer" onClick={onClose}>
           <img src={require("../assets/images/icon-16.gif").default} alt="" />
         </div>
         <h1 className="member-l-title">注册会员</h1>
-        <div className="reg-table">
-          <form onSubmit={onSubmit} autoComplete="off">
-            <table className="basic-table" style={{ width: "720px" }}>
-              <tbody>
-                <tr>
-                  <td>
-                    <table className="basic-table">
-                      <tbody>
-                        <tr>
-                          <td height="40" colSpan={2} align="center">
-                            (带 *
-                            号的表示为必填项目，会员名称必须大于3位小于20位，密码必须大于3位)
-                          </td>
-                        </tr>
-                        <tr>
-                          <td width="130" height="40" align="right">
-                            会员名称&nbsp;&nbsp;&nbsp;
-                          </td>
-                          <td width="317">
-                            <input
-                              type="text"
-                              name="account"
-                              value={registerFormData.account}
-                              onChange={onFieldsChange}
-                            />
-                            &nbsp;
-                            <b className="fc1">*</b>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td height="30" align="right">
-                            &nbsp;
-                          </td>
-                          <td>可用中文，但禁止除[@][.]以外的特殊符号</td>
-                        </tr>
-                        {/* <tr>
-                  <td height="40" align="right">
-                    昵　　称&nbsp;&nbsp;&nbsp;
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      name="nickname"
-                      value={registerFormData.nickname}
-                      onChange={onFieldsChange}
-                    />
-                  </td>
-                  <td className="f12">
-                    <b className="fc1">*</b>
-                  </td>
-                </tr> */}
-                        <tr>
-                          <td height="40" align="right">
-                            登录密码&nbsp;&nbsp;&nbsp;
-                          </td>
-                          <td>
-                            <input
-                              type="password"
-                              name="pwd"
-                              value={registerFormData.pwd}
-                              onChange={onFieldsChange}
-                            />
-                            &nbsp;
-                            <b className="fc1">*</b>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td height="40" align="right">
-                            确定密码&nbsp;&nbsp;&nbsp;
-                          </td>
-                          <td>
-                            <input
-                              type="password"
-                              name="confirmPwd"
-                              value={registerFormData.confirmPwd}
-                              onChange={onFieldsChange}
-                            />
-                            &nbsp;
-                            <b className="fc1">*</b>
-                          </td>
-                        </tr>
-                        {/* <tr>
-                  <td height="40" align="right">
-                    验证码&nbsp;&nbsp;&nbsp;
-                  </td>
-                  <td colSpan={2}>
-                    <table className="basic-table" style={{ width: "400px" }}>
-                      <tbody>
-                        <tr>
-                          <td width="120">
-                            <input
-                              style={{ width: "110px" }}
-                              type="text"
-                              name="verificationCode"
-                              value={registerFormData.verificationCode}
-                              onChange={onFieldsChange}
-                            />
-                          </td>
-                          <td width="82">
-                            {captchaLoading ? (
-                              <div className="captcha-loading">
-                                <img
-                                  src={
-                                    require("../assets/images/loading.svg")
-                                      .default
-                                  }
-                                  alt=""
-                                />
-                              </div>
-                            ) : (
-                              <img
-                                className="captcha"
-                                src={captcha}
-                                alt="验证码"
-                              />
-                            )}
-                          </td>
-                          <td width="198" className="f12">
-                            看不清？
-                            <span
-                              className="fc1 cursor-pointer"
-                              onClick={onGetCaptcha}
-                            >
-                              点击更换
-                            </span>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                </tr> */}
-                        <tr>
-                          <td height="40" align="right">
-                            手机号码&nbsp;&nbsp;&nbsp;
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              name="mobile"
-                              value={registerFormData.mobile}
-                              onChange={onFieldsChange}
-                            />
-                            <span
-                              className="f12"
-                              style={{ lineHeight: "36px" }}
-                            >
-                              &nbsp;
-                              <b className="fc1">*</b>&nbsp;&nbsp;&nbsp;
-                              <span
-                                className="p-yzm cursor-pointer"
-                                style={{ color: "#ff5500" }}
-                                onClick={onCaptchaModalShow}
-                              >
-                                获取手机验证码
-                              </span>
-                            </span>
-                          </td>
-                          {/* <td className="f12" style={{ lineHeight: "36px" }}>
-                    <b className="fc1">*</b>
-                    <span
-                      className="p-yzm cursor-pointer"
-                      onClick={onCaptchaModalShow}
-                    >
-                      获取手机验证码
-                    </span>
-                  </td> */}
-                        </tr>
-                        <tr>
-                          <td height="40" align="right">
-                            短信验证码&nbsp;&nbsp;&nbsp;
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              name="verificationCode"
-                              value={registerFormData.verificationCode}
-                              onChange={onFieldsChange}
-                            />
-                            &nbsp;
-                            <b className="fc1">*</b>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td height="40" align="right">
-                            得知渠道&nbsp;&nbsp;&nbsp;
-                          </td>
-                          <td>
-                            <select
-                              name="channelId"
-                              value={registerFormData.channelId}
-                              onChange={onFieldsChange}
-                            >
-                              <option value="">请选择</option>
-                              {channelList.map((item) => (
-                                <option
-                                  value={item.channelId}
-                                  key={item.channelId}
-                                >
-                                  {item.channelName}
-                                </option>
-                              ))}
-                            </select>
-                            &nbsp;
-                            <b className="fc1">*</b>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td height="8" colSpan={2} align="right"></td>
-                        </tr>
-                        <tr>
-                          <td height="40" align="right">
-                            会员注册协议&nbsp;&nbsp;&nbsp;
-                          </td>
-                          <td>
-                            <div className="xy">
-                              1、在本站注册的会员，必须遵守《互联网电子公告服务管理规定》，不得在本站发表诽谤他人，侵犯他人隐私，侵犯他人知识产权，传播病毒，政治言论，商业讯息等信息。
-                              <br />
-                              2、在所有在本站发表的文章，本站都具有最终编辑权，并且保留用于印刷或向第三方发表的权利，如果你的资料不齐全，我们将有权不作任何通知使用你在本站发布的作品。
-                              <br />
-                              3、在登记过程中，您将选择注册名和密码。注册名的选择应遵守法律法规及社会公德。您必须对您的密码保密，您将对您注册名和密码下发生的所有活动承担责任。
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td height="40">&nbsp;</td>
-                          <td>
-                            <label>
-                              <input
-                                style={{ verticalAlign: "middle" }}
-                                type="checkbox"
-                                name="field3"
-                                checked={registerFormData.field3}
-                                onChange={onFieldsChange}
-                              />
-                              &nbsp;我已阅读并完全接受服务协议
-                            </label>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td height="80" colSpan={2} align="center">
-                            <input
-                              type="submit"
-                              value="确定提交"
-                              className="m-buttton cursor-pointer"
-                            />
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                  <td width="273">
-                    <div className="wx-reg">
-                      <img
-                        src={require("../assets/images/wx-reg.gif").default}
-                        alt=""
-                      />
-                      <p>微信扫码关注注册</p>
-                      <img
-                        src={require("../assets/images/wx-reg02.gif").default}
-                        alt=""
-                      />
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </form>
-        </div>
+        {registerRender()}
       </div>
 
       <Modal

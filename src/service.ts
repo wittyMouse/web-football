@@ -347,3 +347,28 @@ export function requestBindingOpenIdByCode(data: any) {
     data,
   });
 }
+
+
+/**
+ * 微信注册
+ * @param token
+ */
+ export function requestRegisterByWechat(data: any) {
+  return request.request({
+    url: "/api/member/registerByWechat",
+    method: "post",
+    data
+  });
+}
+
+/**
+ * 修改会员信息
+ * @param token
+ */
+ export function requestEditMemberInfo(data: any) {
+  return request.request({
+    url: "/api/member/editMemberInfo",
+    method: "post",
+    data
+  });
+}

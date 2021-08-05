@@ -7,6 +7,7 @@ import {
   requestRecommendArticleList,
   requestUserInfoByDepartment,
   requestBestNews,
+  requestRankingList
 } from "./service";
 import { requestAdConfigInfo } from "../../service";
 
@@ -88,6 +89,21 @@ const BestNews: React.FC<BestNewsProps> = () => {
     });
   };
 
+  const getRankingList = (type: number, cb: (result: any) => void) => {
+    const data = {
+      type,
+      pageNo: 1,
+      pageSize: 10,
+    };
+    requestRankingList(data).then((res) => {
+      if (res.data.code === 0) {
+        cb && cb(res.data.result.records);
+      } else {
+        console.error(res.data.message);
+      }
+    });
+  };
+
   useEffect(() => {
     getAdConfigInfo((result) => {
       if (result) {
@@ -114,7 +130,13 @@ const BestNews: React.FC<BestNewsProps> = () => {
 
     getRecommendArticleList();
     // 预言家
-    getUserList("2", (result) => {
+    // getUserList("2", (result) => {
+    //   setUserList(result);
+    // });
+
+    // 劲爆贴士榜
+    getRankingList(1, (result) => {
+      // console.log(result);
       setUserList(result);
     });
   }, []);
@@ -123,7 +145,13 @@ const BestNews: React.FC<BestNewsProps> = () => {
     if (isLogin) {
       getRecommendArticleList();
       // 预言家
-      getUserList("2", (result) => {
+      // getUserList("2", (result) => {
+      //   setUserList(result);
+      // });
+
+      // 劲爆贴士榜
+      getRankingList(1, (result) => {
+        // console.log(result);
         setUserList(result);
       });
     }
@@ -162,7 +190,7 @@ const BestNews: React.FC<BestNewsProps> = () => {
             recommendList={recommendArticleList}
           />
 
-          <RankingList title="线人精准榜" userList={userList} />
+          <RankingList title="劲爆贴士榜" userList={userList} />
         </div>
       </div>
 

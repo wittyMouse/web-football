@@ -7,7 +7,7 @@ import App from "./App";
 import store from "./store";
 import { Provider } from "react-redux";
 // import { Helmet } from "react-helmet";
-import ScrollToTop from "./components/ScrollToTop";
+// import ScrollToTop from "./components/ScrollToTop";
 import reportWebVitals from "./reportWebVitals";
 import dayjs from "dayjs";
 import "dayjs/locale/zh-cn";
@@ -20,7 +20,7 @@ ReactDOM.render(
       {/* <Helmet>
         <title>巅峰足球</title>
       </Helmet> */}
-      <ScrollToTop />
+      {/* <ScrollToTop /> */}
       <App />
     </Provider>
   </Router>,

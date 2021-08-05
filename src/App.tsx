@@ -9,11 +9,14 @@ import {
   setWeChartBoxVisible,
   changeLoginStatus,
   setUserInfo,
+  setRegisterStatus,
+  setRegisterBoxVisible
 } from "./store/globalSlice";
 import {
   requestUserInfo,
   requestLoginByQRCode,
   requestBindingOpenIdByCode,
+  requestRegisterByWechat,
 } from "./service";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -23,7 +26,6 @@ import BasicHeader from "./components/BasicHeader";
 import BasicFooter from "./components/BasicFooter";
 import Loading from "./components/Loading";
 import querystring from "querystring";
-import { resolve } from "dns";
 
 const Home = React.lazy(() => import("./pages/home"));
 const Playback = React.lazy(() => import("./pages/playback"));
@@ -58,53 +60,53 @@ function App() {
     });
   };
 
-  const loginByQRCode = (data: { code: string, type: number }) => {
-    requestLoginByQRCode(data).then((res) => {
-      if (res.data.code === 0) {
-        const token = res.data.result;
-        getUserInfo(token, (res) => {
-          if (res.data.code === 0) {
-            const userInfo = res.data.result;
-            window.localStorage.setItem("token", token);
-            window.localStorage.setItem("userInfo", JSON.stringify(userInfo));
-            dispatch(
-              changeLoginStatus({
-                token,
-                userInfo,
-                isLogin: true,
-              })
-            );
-            dispatch(
-              setTipsBoxConfig({
-                type: "success",
-                title: "操作成功",
-                content: "登录成功",
-              })
-            );
-            dispatch(setTipsBoxVisible(true));
-          } else {
-            dispatch(
-              setTipsBoxConfig({
-                type: "error",
-                title: "操作失败",
-                content: res.data.message,
-              })
-            );
-            dispatch(setTipsBoxVisible(true));
-          }
-        });
-      } else {
-        dispatch(
-          setTipsBoxConfig({
-            type: "error",
-            title: "操作失败",
-            content: res.data.message,
-          })
-        );
-        dispatch(setTipsBoxVisible(true));
-      }
-    });
-  };
+  // const loginByQRCode = (data: { code: string, type: number }) => {
+  //   requestLoginByQRCode(data).then((res) => {
+  //     if (res.data.code === 0) {
+  //       const token = res.data.result;
+  //       getUserInfo(token, (res) => {
+  //         if (res.data.code === 0) {
+  //           const userInfo = res.data.result;
+  //           window.localStorage.setItem("token", token);
+  //           window.localStorage.setItem("userInfo", JSON.stringify(userInfo));
+  //           dispatch(
+  //             changeLoginStatus({
+  //               token,
+  //               userInfo,
+  //               isLogin: true,
+  //             })
+  //           );
+  //           dispatch(
+  //             setTipsBoxConfig({
+  //               type: "success",
+  //               title: "操作成功",
+  //               content: "登录成功",
+  //             })
+  //           );
+  //           dispatch(setTipsBoxVisible(true));
+  //         } else {
+  //           dispatch(
+  //             setTipsBoxConfig({
+  //               type: "error",
+  //               title: "操作失败",
+  //               content: res.data.message,
+  //             })
+  //           );
+  //           dispatch(setTipsBoxVisible(true));
+  //         }
+  //       });
+  //     } else {
+  //       dispatch(
+  //         setTipsBoxConfig({
+  //           type: "error",
+  //           title: "操作失败",
+  //           content: res.data.message,
+  //         })
+  //       );
+  //       dispatch(setTipsBoxVisible(true));
+  //     }
+  //   });
+  // };
 
   const bindingOpenIdByCode = (data: { token: string; code: string }) => {
     const { token } = data;
@@ -132,6 +134,61 @@ function App() {
                 isLogin: true,
               })
             );
+          }
+        });
+      } else {
+        dispatch(
+          setTipsBoxConfig({
+            type: "error",
+            title: "操作失败",
+            content: res.data.message,
+          })
+        );
+        dispatch(setTipsBoxVisible(true));
+      }
+    });
+  };
+
+  const registerByWechat = (data: { code: string; type: number }) => {
+    requestRegisterByWechat(data).then((res) => {
+      if (res.data.code === 0) {
+        const token = res.data.result;
+        getUserInfo(token, (res) => {
+          if (res.data.code === 0) {
+            const userInfo = res.data.result;
+            if (!userInfo.mobile) {
+              window.sessionStorage.setItem("register-token", token);
+              window.sessionStorage.setItem("register-userInfo", JSON.stringify(userInfo));
+              dispatch(setRegisterStatus(2))
+              dispatch(setRegisterBoxVisible(true))
+            } else {
+              window.localStorage.setItem("token", token);
+              window.localStorage.setItem("userInfo", JSON.stringify(userInfo));
+              dispatch(
+                changeLoginStatus({
+                  token,
+                  userInfo,
+                  isLogin: true,
+                })
+              );
+              dispatch(
+                setTipsBoxConfig({
+                  type: "success",
+                  title: "操作成功",
+                  content: "登录成功",
+                })
+              );
+              dispatch(setTipsBoxVisible(true));
+            }
+          } else {
+            dispatch(
+              setTipsBoxConfig({
+                type: "error",
+                title: "操作失败",
+                content: res.data.message,
+              })
+            );
+            dispatch(setTipsBoxVisible(true));
           }
         });
       } else {
@@ -265,7 +322,7 @@ function App() {
 
               if (res.code) {
                 if (target === "login") {
-                  loginByQRCode({ code: res.code as string, type: 0 });
+                  registerByWechat({ code: res.code as string, type: 0 });
                 } else if (target === "bind") {
                   const token = window.localStorage.getItem("token");
                   bindingOpenIdByCode({

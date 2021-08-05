@@ -11,8 +11,8 @@ export interface LoginParams extends LoginFormData {
 }
 
 export interface RegisterFormData {
-  account: string;
-  pwd: string;
+  account?: string;
+  pwd?: string;
   confirmPwd?: string;
   mobile: string;
   verificationCode: string;

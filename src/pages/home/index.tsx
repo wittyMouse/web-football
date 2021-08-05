@@ -274,6 +274,7 @@ const Home: React.FC<HomeProps> = (props) => {
               result,
               resultMap,
               num,
+              sale
             } = item;
             return (
               <dl
@@ -284,6 +285,7 @@ const Home: React.FC<HomeProps> = (props) => {
                 }}
               >
                 {/* <div className="gxshul">5</div> */}
+                {sale ? <div className="sale-time"></div> : null}
                 {num && num > 0 ? (
                   <div className="new-mark">
                     <img

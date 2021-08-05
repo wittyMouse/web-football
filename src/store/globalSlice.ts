@@ -34,6 +34,7 @@ interface GlobalState extends loginState {
   weChartBoxVisible: boolean;
   tipsBoxVisible: boolean;
   tipsBoxConfig: TipsBoxConfig;
+  registerStatus: number;
 }
 
 const initialState: GlobalState = {
@@ -49,6 +50,7 @@ const initialState: GlobalState = {
     title: "",
     content: "",
   },
+  registerStatus: 1,
 };
 
 const globalSlice = createSlice({
@@ -85,6 +87,9 @@ const globalSlice = createSlice({
     setTipsBoxConfig(state, action: PayloadAction<TipsBoxConfig>) {
       state.tipsBoxConfig = action.payload;
     },
+    setRegisterStatus(state, action: PayloadAction<number>) {
+      state.registerStatus = action.payload;
+    },
   },
 });
 
@@ -98,6 +103,7 @@ export const {
   setWeChartBoxVisible,
   setTipsBoxVisible,
   setTipsBoxConfig,
+  setRegisterStatus,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;

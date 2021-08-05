@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store/index";
 import {
   setLoginBoxVisible,
+  setRegisterStatus,
   setRegisterBoxVisible,
   changeLoginStatus,
 } from "../store/globalSlice";
@@ -13,7 +14,7 @@ const BasicHeader: React.FC<{}> = () => {
   const { token, userInfo, isLogin } = useSelector(
     (state: RootState) => state.global
   );
-  const { nickname, balance, integral } = userInfo;
+  const { avatar, nickname, balance, integral } = userInfo;
   const dispatch = useDispatch();
   const history = useHistory();
   const location = useLocation();
@@ -66,10 +67,22 @@ const BasicHeader: React.FC<{}> = () => {
 
           {isLogin ? (
             <div className="f_r">
-              <span>{nickname}</span>，你好！ 当前金币数量：
-              <span>{balance}</span> 当前积分数量：
-              <span>{integral}</span>
-              &nbsp;&nbsp;
+              <div className="avatar-wrapper">
+                <img className="avatar" src={avatar} alt="" />
+              </div>&nbsp;&nbsp;
+
+              <div className="line-item">
+                <div className="line-text">
+                  <span>{nickname}</span>，你好！
+                </div>
+
+                <div className="line-text">
+                  当前金币数量：
+                  <span>{balance}</span> 当前积分数量：
+                  <span>{integral}</span>
+                </div>
+              </div>&nbsp;&nbsp;
+
               <input
                 className="bat-login cursor-pointer"
                 type="button"
@@ -77,6 +90,7 @@ const BasicHeader: React.FC<{}> = () => {
                 style={{ width: "80px" }}
                 onClick={onLink}
               />
+
               <input
                 className="bat-reg cursor-pointer"
                 type="button"
@@ -100,6 +114,7 @@ const BasicHeader: React.FC<{}> = () => {
                 type="button"
                 value="注册"
                 onClick={() => {
+                  dispatch(setRegisterStatus(1));
                   dispatch(setRegisterBoxVisible(true));
                 }}
               />

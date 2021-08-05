@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Switch, Route, Redirect, RouteChildrenProps } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/index";
-import { setTipsBoxConfig, setTipsBoxVisible } from "../../store/globalSlice";
+import { setTipsBoxConfig, setTipsBoxVisible, setUserInfo } from "../../store/globalSlice";
 import CheckInBox from "./components/CheckInBox";
 import CheckInCard from "./components/CheckInCard";
 import MemberRecharge from "./components/MemberRecharge";
@@ -20,7 +20,7 @@ import {
   requestSignInConfigList,
 } from "./service";
 import { CheckInInfo, CheckInConfig } from "./data";
-import { requestAdConfigInfo } from "../../service";
+import { requestAdConfigInfo, requestUserInfo } from "../../service";
 
 interface UserCenterProps extends RouteChildrenProps {}
 
@@ -170,6 +170,7 @@ const UserCenter: React.FC<UserCenterProps> = (props) => {
    * 关闭充值弹窗
    */
   const onRechargeClose = () => {
+    getUserInfo()
     setRechargeBoxVisible(false);
   };
 
@@ -190,6 +191,15 @@ const UserCenter: React.FC<UserCenterProps> = (props) => {
       }
     });
   };
+
+  const getUserInfo = () => {
+    requestUserInfo(token).then((res) => {
+      if (res.data.code === 0) {
+        const userInfo = res.data.result;
+        dispatch(setUserInfo(userInfo));
+      }
+    })
+  }
 
   useEffect(() => {
     getAdConfigInfo((result) => {

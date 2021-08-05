@@ -113,7 +113,7 @@ const Article: React.FC<ArticleProps> = (props) => {
             recommendList={recommendArticleList}
           />
 
-          <RankingList title="线人精准榜" userList={userList} />
+          <RankingList title="劲爆贴士榜" userList={userList} />
         </div>
       </div>
       <div className="foot-gg box-s">

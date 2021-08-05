@@ -26,9 +26,10 @@ const Card: React.FC<CardProps> = (props) => {
       <h1 className="title-bg02 h-bg11">{title}</h1>
       <div className="clearfix tj-list">
         {userList?.map((item: any) => {
-          const { avatar, description, id, realname, result, resultMap } = item;
+          const { avatar, description, id, realname, result, resultMap, sale } = item;
           return (
             <dl key={id}>
+              {sale ? <div className="sale-time"></div> : null}
               <dd className="box-s" key={id}>
                 <Link to={`/recommend/detail/${id}`}>
                   <img src={avatar} />

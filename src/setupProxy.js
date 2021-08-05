@@ -8,11 +8,11 @@ module.exports = function (app) {
       changeOrigin: true,
     })
   );
-  app.use(
-    "/df_test",
-    createProxyMiddleware({
-      target: "https://www.df1668.com",
-      changeOrigin: true,
-    })
-  );
+  // app.use(
+  //   "/df_test",
+  //   createProxyMiddleware({
+  //     target: "https://www.df1668.com",
+  //     changeOrigin: true,
+  //   })
+  // );
 };
