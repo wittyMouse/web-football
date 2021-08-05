@@ -306,7 +306,11 @@ function App() {
           <Route
             path="/redirect"
             render={({ location }) => {
-              dispatch(setLoginBoxVisible(false));
+              if (loginBoxVisible) {
+                dispatch(setLoginBoxVisible(false));
+              } else if (registerBoxVisible) {
+                dispatch(setRegisterBoxVisible(false));
+              }
               // console.log(location.search)
               const res = querystring.parse(
                 location.search.replace("?", "")
