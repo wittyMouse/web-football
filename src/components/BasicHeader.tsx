@@ -22,7 +22,7 @@ const BasicHeader: React.FC<{}> = () => {
     vipLevel = 1,
     exp,
     nextVipLeveExp,
-  } = userInfo
+  } = userInfo;
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -82,8 +82,9 @@ const BasicHeader: React.FC<{}> = () => {
                     <div className="tx-bk">
                       <img
                         src={
-                          require(`../assets/images/bk-icon0${vipLevel && vipLevel > 0 ? vipLevel : 1}.png`)
-                            .default
+                          require(`../assets/images/bk-icon0${
+                            vipLevel && vipLevel > 0 ? vipLevel : 1
+                          }.png`).default
                         }
                         alt=""
                       />

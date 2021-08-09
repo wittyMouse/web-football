@@ -295,12 +295,12 @@ input:-ms-input-placeholder {
   clear: both;
   visibility: hidden;
 }
-*html .clearfix {
+/* *html .clearfix {
   height: 1%;
 }
 * + html .clearfix {
   height: 1%;
-}
+} */
 .line01 {
   border-bottom: 1px solid #ddd;
 }
