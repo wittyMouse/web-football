@@ -14,7 +14,16 @@ const BasicHeader: React.FC<{}> = () => {
   const { token, userInfo, isLogin } = useSelector(
     (state: RootState) => state.global
   );
-  const { avatar, nickname, balance, integral } = userInfo;
+  const {
+    avatar,
+    nickname,
+    balance,
+    integral,
+    vipLevel = 1,
+    exp,
+    nextVipLeveExp,
+  } = userInfo
+
   const dispatch = useDispatch();
   const history = useHistory();
   const location = useLocation();
@@ -67,36 +76,49 @@ const BasicHeader: React.FC<{}> = () => {
 
           {isLogin ? (
             <div className="f_r">
-              <div className="avatar-wrapper">
-                <img className="avatar" src={avatar} alt="" />
-              </div>&nbsp;&nbsp;
-
-              <div className="line-item">
-                <div className="line-text">
-                  <span>{nickname}</span>，你好！
-                </div>
-
-                <div className="line-text">
-                  当前金币数量：
-                  <span>{balance}</span> 当前积分数量：
-                  <span>{integral}</span>
-                </div>
-              </div>&nbsp;&nbsp;
-
-              <input
-                className="bat-login cursor-pointer"
-                type="button"
-                value="用户中心"
-                style={{ width: "80px" }}
-                onClick={onLink}
-              />
-
-              <input
-                className="bat-reg cursor-pointer"
-                type="button"
-                value="退出"
-                onClick={onLogout}
-              />
+              <dl className="l-m-text">
+                <dt>
+                  <div className="tx-img">
+                    <div className="tx-bk">
+                      <img
+                        src={
+                          require(`../assets/images/bk-icon0${vipLevel && vipLevel > 0 ? vipLevel : 1}.png`)
+                            .default
+                        }
+                        alt=""
+                      />
+                    </div>
+                    <img src={avatar} alt="" />
+                  </div>
+                  <span>
+                    <b>{nickname}</b> 金币：
+                    <b className="f-color01">{balance}</b> ，积分：
+                    <b className="f-color01">{integral}</b>
+                  </span>
+                  <div className="lever-x">
+                    <i>Lv.{vipLevel}</i>
+                    {exp}/{nextVipLeveExp}
+                    <p>
+                      <span style={{ width: "80%" }}></span>
+                    </p>
+                  </div>
+                </dt>
+                <dd>
+                  <input
+                    className="bat-login cursor-pointer"
+                    type="button"
+                    value="用户中心"
+                    style={{ width: "80px" }}
+                    onClick={onLink}
+                  />
+                  <input
+                    className="bat-reg cursor-pointer"
+                    type="button"
+                    value="退出"
+                    onClick={onLogout}
+                  />
+                </dd>
+              </dl>
             </div>
           ) : (
             <div className="f_r">
