@@ -36,10 +36,10 @@ const LatestClue: React.FC<LatestClueProps> = () => {
    */
   const getLatestArticleList = () => {
     setLatestArticleListLoading(true);
-    requestLatestArticleList({ token, columnIds: ["3", "524377944060203023"] })
+    requestLatestArticleList({ token, columnIds: ["3", "524377944060203023"], pageNo: 1, pageSize: 40 })
       .then((res) => {
         if (res.data.code === 0) {
-          setLatestArticleList(res.data.result);
+          setLatestArticleList(res.data.result.records);
         } else {
           console.error(res.data.message);
         }

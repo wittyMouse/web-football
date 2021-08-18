@@ -55,10 +55,10 @@ const Home: React.FC<HomeProps> = (props) => {
   // 最新线报
   const getLatestArticleList = () => {
     setLatestArticleListLoading(true);
-    requestLatestArticleList({ token, columnIds: ["524385721436475449"] })
+    requestLatestArticleList({ token, columnIds: ["524385721436475449"], pageNo: 1, pageSize: 20 })
       .then((res) => {
         if (res.data.code === 0) {
-          setLatestArticleList(res.data.result);
+          setLatestArticleList(res.data.result.records);
         } else {
           console.error(res.data.message);
         }
