@@ -1,0 +1,9 @@
+.tips {
+  margin: 0 120px;
+  padding: 64px 0;
+}
+
+.tips .tips-card {
+  padding: 8px;
+  background-color: #fff;
+}
