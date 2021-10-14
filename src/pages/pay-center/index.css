@@ -1,0 +1,68 @@
+.pay-center {
+  margin: 0 120px;
+  padding: 64px 0;
+}
+
+.pay-center .custom-card {
+  padding: 8px;
+  background-color: #ffffff;
+}
+
+.pay-center .h-bg14 {
+  margin: 0;
+}
+
+.pay-center .custom-card__header {
+}
+
+.pay-center .custom-card__content {
+  padding: 32px 0;
+}
+
+.pay-center .tips-text {
+  margin-bottom: 32px;
+  font-size: 16px;
+  color: #c7000b;
+}
+
+.pay-center .pay-info {
+  margin-bottom: 32px;
+  font-size: 16px;
+}
+
+.pay-center .special-text {
+  font-size: 24px;
+  color: #f50;
+}
+
+.pay-center .button-wrapper {
+}
+
+.pay-center .custom-button {
+  display: inline-block;
+  width: 100px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 500;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.pay-center .custom-button + .custom-button {
+  margin-left: 8px;
+}
+
+.pay-center .custom-button.wechat {
+  background-color: #00c250;
+}
+
+.pay-center .custom-button.alipay {
+  background-color: #1890ff;
+}

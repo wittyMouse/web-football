@@ -1,0 +1,17 @@
+.custom-box {
+}
+
+.custom-box__header {
+    padding: 16px;
+}
+
+.custom-box__content {
+    padding: 0 16px;
+    text-align: center;
+}
+
+.custom-box__footer {
+    padding: 16px;
+    font-size: 12px;
+    color: #c7000b;
+}
