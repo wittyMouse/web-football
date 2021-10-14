@@ -348,16 +348,15 @@ export function requestBindingOpenIdByCode(data: any) {
   });
 }
 
-
 /**
  * 微信注册
  * @param token
  */
- export function requestRegisterByWechat(data: any) {
+export function requestRegisterByWechat(data: any) {
   return request.request({
     url: "/api/member/registerByWechat",
     method: "post",
-    data
+    data,
   });
 }
 
@@ -365,10 +364,46 @@ export function requestBindingOpenIdByCode(data: any) {
  * 修改会员信息
  * @param token
  */
- export function requestEditMemberInfo(data: any) {
+export function requestEditMemberInfo(data: any) {
   return request.request({
     url: "/api/member/editMemberInfo",
     method: "post",
-    data
+    data,
+  });
+}
+
+/**
+ * Native 方式创建订单
+ * @param data
+ */
+export function requestCreateOrderByNative(data: any) {
+  return request.request({
+    url: "/api/member/createOrderByNative",
+    method: "post",
+    data,
+  });
+}
+
+/**
+ * 创建阿里 PC 支付
+ * @param data
+ */
+export function requestCreateOrderByAlipayPC(data: any) {
+  return request.request({
+    url: "/api/member/createOrderByAlipayPC",
+    method: "post",
+    data,
+  });
+}
+
+/**
+ * 查询订单
+ * @param token
+ */
+export function requestGetRechargeRecordById(data: any) {
+  return request.request({
+    url: "/api/member/getRechargeRecordById",
+    method: "post",
+    data,
   });
 }
