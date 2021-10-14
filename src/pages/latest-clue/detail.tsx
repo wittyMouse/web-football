@@ -23,7 +23,7 @@ import { requestUserInfo, requestAdConfigInfo } from "../../service";
 interface LatestClueDetailProps extends RouteChildrenProps {}
 
 const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
-  const { match } = props;
+  const { history, match } = props;
   const { token, isLogin, userInfo } = useSelector(
     (state: RootState) => state.global
   );
@@ -165,7 +165,8 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
 
   // 点击充值按钮
   const onRechargeClick = () => {
-    setRechargeBoxVisible(true);
+    // setRechargeBoxVisible(true);
+    history.push("/user-center")
   };
 
   // 显示更多

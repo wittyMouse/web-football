@@ -52,7 +52,7 @@ const Tabs: React.FC<TabsProps> = (props) => {
           >
             <a>所有流水账</a>
           </li>
-          <li
+          {/* <li
             className={`cursor-pointer ${
               pathname.indexOf("tab5") > -1 ? "seled" : ""
             }`}
@@ -61,7 +61,7 @@ const Tabs: React.FC<TabsProps> = (props) => {
             }}
           >
             <a>会员资料修改</a>
-          </li>
+          </li> */}
         </ul>
       </div>
 

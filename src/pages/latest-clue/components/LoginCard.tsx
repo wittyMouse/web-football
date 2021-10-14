@@ -13,6 +13,8 @@ const LoginCard: React.FC<LoginCardProps> = (props) => {
       <div className="b-c-tishi">
         这篇文档需要 <b>{articleDetail.amount}</b> 金币 才能访问
         <br />
+        请先&nbsp;
+        <span className="fc1">登录</span>
         <div className="b-login">
           <table className="basic-table" style={{ width: "270px" }}>
             <tbody>
@@ -20,7 +22,7 @@ const LoginCard: React.FC<LoginCardProps> = (props) => {
                 <td height="60">
                   <input
                     type="button"
-                    value="确定购买"
+                    value="登录"
                     className="m-buttton cursor-pointer"
                     onClick={() => onLoginClick()}
                   />

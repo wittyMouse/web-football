@@ -10,7 +10,7 @@ export interface UserInfo {
   mobile?: string;
   nickname?: string;
   pwd?: string;
-  registerTime?: number;
+  registerTime?: string;
   status?: number;
   upgradeTime?: string;
   [propName: string]: any;

@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Switch, Route, Redirect, RouteChildrenProps } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/index";
-import { setTipsBoxConfig, setTipsBoxVisible, setUserInfo } from "../../store/globalSlice";
+import {
+  setTipsBoxConfig,
+  setTipsBoxVisible,
+  setUserInfo,
+} from "../../store/globalSlice";
 import CheckInBox from "./components/CheckInBox";
 import CheckInCard from "./components/CheckInCard";
 import MemberRecharge from "./components/MemberRecharge";
@@ -21,6 +25,7 @@ import {
 } from "./service";
 import { CheckInInfo, CheckInConfig } from "./data";
 import { requestAdConfigInfo, requestUserInfo } from "../../service";
+import querystring from "querystring";
 
 interface UserCenterProps extends RouteChildrenProps {}
 
@@ -37,19 +42,23 @@ const UserCenter: React.FC<UserCenterProps> = (props) => {
   const [checkInBoxVisible, setCheckInBoxVisible] = useState<boolean>(false);
   const [checkInLoading, setCheckInLoading] = useState<boolean>(false);
   const [rechargeBoxVisible, setRechargeBoxVisible] = useState<boolean>(false);
-  const [currentPrice, setCurrentPrice] = useState<string>("1");
-  const [
-    signInConfigListLoading,
-    setSignInConfigListLoading,
-  ] = useState<boolean>(false);
+  const [currentPrice, setCurrentPrice] = useState<string>("");
+  const [signInConfigListLoading, setSignInConfigListLoading] =
+    useState<boolean>(false);
   const [signInConfigList, setSignInConfigList] = useState<CheckInConfig[]>([]);
 
-  const [
-    donateConfigListLoading,
-    setDonateConfigListLoading,
-  ] = useState<boolean>(false);
+  const [donateConfigListLoading, setDonateConfigListLoading] =
+    useState<boolean>(false);
   const [donateConfigList, setDonateConfigList] = useState<any>([]);
   const [footerAdv, setFooterAdv] = useState<any>([]);
+
+  const donateConfigListMap = useMemo<any>(() => {
+    const obj: any = {};
+    donateConfigList.forEach((item: any) => {
+      obj[item.id] = item;
+    });
+    return obj;
+  }, [donateConfigList]);
 
   /**
    * 获取充值赠送配置
@@ -59,7 +68,11 @@ const UserCenter: React.FC<UserCenterProps> = (props) => {
     requestDonateConfigList()
       .then((res) => {
         if (res.data.code === 0) {
-          setDonateConfigList(res.data.result);
+          const donateConfigList = res.data.result;
+          setDonateConfigList(donateConfigList);
+          if (donateConfigList.length > 0 && donateConfigList[0].id) {
+            setCurrentPrice(donateConfigList[0].id);
+          }
         } else {
           console.error(res.data.message);
         }
@@ -163,14 +176,28 @@ const UserCenter: React.FC<UserCenterProps> = (props) => {
    * 打开充值弹窗
    */
   const onRechargeClick = () => {
-    setRechargeBoxVisible(true);
+    // setRechargeBoxVisible(true);
+    const {
+      id,
+      rechargeAmount: price,
+      donateIntegral: free,
+      type: rechargeType,
+    } = donateConfigListMap[currentPrice];
+    const qs = {
+      type: "recharge",
+      id,
+      price,
+      free,
+      rechargeType,
+    };
+    history.push("/pay-center?" + querystring.stringify(qs));
   };
 
   /**
    * 关闭充值弹窗
    */
   const onRechargeClose = () => {
-    getUserInfo()
+    getUserInfo();
     setRechargeBoxVisible(false);
   };
 
@@ -198,8 +225,8 @@ const UserCenter: React.FC<UserCenterProps> = (props) => {
         const userInfo = res.data.result;
         dispatch(setUserInfo(userInfo));
       }
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     getAdConfigInfo((result) => {
