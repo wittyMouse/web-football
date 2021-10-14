@@ -10,11 +10,10 @@ import {
   changeLoginStatus,
   setUserInfo,
   setRegisterStatus,
-  setRegisterBoxVisible
+  setRegisterBoxVisible,
 } from "./store/globalSlice";
 import {
   requestUserInfo,
-  requestLoginByQRCode,
   requestBindingOpenIdByCode,
   requestRegisterByWechat,
 } from "./service";
@@ -41,9 +40,11 @@ const LatestClueProfile = React.lazy(
 const News = React.lazy(() => import("./pages/news-center/index"));
 const Article = React.lazy(() => import("./pages/news-center/article"));
 const UserCenter = React.lazy(() => import("./pages/user-center"));
+const PayCenter = React.lazy(() => import("./pages/pay-center"));
 const ShopCar = React.lazy(() => import("./pages/shop-car"));
 const CheckOrder = React.lazy(() => import("./pages/shop-car/check-order"));
 const OrderSuccess = React.lazy(() => import("./pages/shop-car/order-success"));
+const Tips = React.lazy(() => import("./pages/tips"));
 
 function App() {
   const {
@@ -158,9 +159,12 @@ function App() {
             const userInfo = res.data.result;
             if (!userInfo.mobile) {
               window.sessionStorage.setItem("register-token", token);
-              window.sessionStorage.setItem("register-userInfo", JSON.stringify(userInfo));
-              dispatch(setRegisterStatus(2))
-              dispatch(setRegisterBoxVisible(true))
+              window.sessionStorage.setItem(
+                "register-userInfo",
+                JSON.stringify(userInfo)
+              );
+              dispatch(setRegisterStatus(2));
+              dispatch(setRegisterBoxVisible(true));
             } else {
               window.localStorage.setItem("token", token);
               window.localStorage.setItem("userInfo", JSON.stringify(userInfo));
@@ -304,6 +308,14 @@ function App() {
             render={(routeProps) => <UserCenter {...routeProps} />}
           />
           <Route
+            path="/pay-center"
+            render={(routeProps) => <PayCenter {...routeProps} />}
+          />
+          <Route
+            path="/tips"
+            render={(routeProps) => <Tips {...routeProps} />}
+          />
+          <Route
             path="/redirect"
             render={({ location }) => {
               if (loginBoxVisible) {
@@ -314,43 +326,57 @@ function App() {
               // console.log(location.search)
               const res = querystring.parse(
                 location.search.replace("?", "")
-              ) as { code?: string; state: string };
+              ) as { code?: string; state: string; type?: string };
 
-              const { url, target } = querystring.parse(
-                (res.state.match(/[\d\w]{2}/g) as string[])
-                  .map((item: string) =>
-                    String.fromCharCode(parseInt(item, 16))
-                  )
-                  .join("")
-              );
-
-              if (res.code) {
-                if (target === "login") {
-                  registerByWechat({ code: res.code as string, type: 0 });
-                } else if (target === "bind") {
-                  const token = window.localStorage.getItem("token");
-                  bindingOpenIdByCode({
-                    code: res.code as string,
-                    token: token as string,
-                  });
-                }
+              if (res.type && res.type === "recharge") {
+                const { origin, pathname } = window.location
+                window.location.href = `${origin}${pathname}#/tips?icon=success&title=提示&subTitle=充值成功`
+                // return (
+                //   <Redirect
+                //     to={{
+                //       pathname:
+                //         "/tips?icon=success&title=提示&subTitle=充值成功" as string,
+                //     }}
+                //   />
+                // );
               } else {
-                dispatch(
-                  setTipsBoxConfig({
-                    type: "error",
-                    title: "操作失败",
-                    content: "用户禁止授权",
-                  })
+                const { url, target } = querystring.parse(
+                  (res.state.match(/[\d\w]{2}/g) as string[])
+                    .map((item: string) =>
+                      String.fromCharCode(parseInt(item, 16))
+                    )
+                    .join("")
                 );
-                dispatch(setTipsBoxVisible(true));
+
+                if (res.code) {
+                  if (target === "login") {
+                    registerByWechat({ code: res.code as string, type: 0 });
+                  } else if (target === "bind") {
+                    const token = window.localStorage.getItem("token");
+                    bindingOpenIdByCode({
+                      code: res.code as string,
+                      token: token as string,
+                    });
+                  }
+                } else {
+                  dispatch(
+                    setTipsBoxConfig({
+                      type: "error",
+                      title: "操作失败",
+                      content: "用户禁止授权",
+                    })
+                  );
+                  dispatch(setTipsBoxVisible(true));
+                }
+
+                return (
+                  <Redirect
+                    to={{
+                      pathname: url as string,
+                    }}
+                  />
+                );
               }
-              return (
-                <Redirect
-                  to={{
-                    pathname: url as string,
-                  }}
-                />
-              );
             }}
           />
         </Switch>
