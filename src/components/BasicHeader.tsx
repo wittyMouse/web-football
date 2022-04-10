@@ -89,7 +89,7 @@ const BasicHeader: React.FC<{}> = () => {
                         alt=""
                       />
                     </div>
-                    <img src={avatar} alt="" />
+                    <img src={avatar || require('../assets/images/avatar.gif').default} alt="" />
                   </div>
                   <span>
                     <b>{nickname}</b> 金币：
