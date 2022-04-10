@@ -8,6 +8,7 @@ import {
 } from "../../store/globalSlice";
 import { RootState } from "../../store/index";
 import Pagination from "../../components/Pagination";
+import ConfirmBox from "./components/ConfirmBox";
 import {
   requestUserInfo,
   requestSubscribe,
@@ -71,6 +72,7 @@ const RecommendDetail: React.FC<RecommendDetailProps> = (props) => {
   const { id } = match?.params as any;
   const [headerAdv, setHeaderAdv] = useState<any>([]);
   const [footerAdv, setFooterAdv] = useState<any>([]);
+  const [confirmBoxVisible, setConfirmBoxVisible] = useState<boolean>(false);
 
   // 获取发布人信息
   const getUserInfo = (cb?: (userDetail: any) => void) => {
@@ -193,10 +195,7 @@ const RecommendDetail: React.FC<RecommendDetailProps> = (props) => {
         );
         dispatch(setTipsBoxVisible(true));
       } else {
-        subscribe(() => {
-          getMemberInfo();
-          getRecommendList();
-        });
+        setConfirmBoxVisible(true);
       }
     });
   };
@@ -292,6 +291,28 @@ const RecommendDetail: React.FC<RecommendDetailProps> = (props) => {
   };
 
   /**
+   * 订阅推介
+   */
+  const onConfirmBoxSubmit = () => {
+    if (subscribeLoading) {
+      return;
+    }
+
+    subscribe(() => {
+      onConfirmBoxClose();
+      getMemberInfo();
+      getRecommendList();
+    });
+  };
+
+  /**
+   * 关闭确认框
+   */
+  const onConfirmBoxClose = () => {
+    setConfirmBoxVisible(false);
+  };
+
+  /**
    * 修改当前页
    * @param current
    */
@@ -352,6 +373,16 @@ const RecommendDetail: React.FC<RecommendDetailProps> = (props) => {
 
   return (
     <div>
+      {confirmBoxVisible ? (
+        <ConfirmBox
+          userInfo={userInfo}
+          userDetail={userDetail}
+          current={current}
+          onConfirm={onConfirmBoxSubmit}
+          onClose={onConfirmBoxClose}
+        />
+      ) : null}
+
       <div className="top-gg box-s">
         <img
           className="cursor-pointer"
