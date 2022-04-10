@@ -15,7 +15,7 @@ request.interceptors.request.use(
     // Do something before request is sent
 
     // config.url = `/df_test${config.url}`;
-    config.url = `/df${config.url}`;
+    config.url = `${process.env.REACT_APP_BASE_URL}${config.url}`;
 
     return config;
   },
