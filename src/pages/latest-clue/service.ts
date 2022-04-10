@@ -100,10 +100,34 @@ export function requestArticleList(token: string) {
  * 获取分页榜单列表
  * @param token
  */
- export function requestRankingList(data: any) {
+export function requestRankingList(data: any) {
   return request({
     url: "/api/member/rankingList",
     method: "post",
-    data
+    data,
+  });
+}
+
+/**
+ * 至尊推介订购
+ * @param token
+ */
+export function requestSubscribe(params: any) {
+  return request({
+    url: "/api/member/subscribe",
+    method: "post",
+    data: params,
+  });
+}
+
+/**
+ * 文章推介购买
+ * @param token
+ */
+export function requestBuyArticleMarketing(params: any) {
+  return request({
+    url: "/api/member/buyArticleMarketing",
+    method: "post",
+    data: params,
   });
 }

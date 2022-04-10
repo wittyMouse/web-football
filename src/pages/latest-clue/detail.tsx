@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/index";
-import { setLoginBoxVisible, setUserInfo } from "../../store/globalSlice";
+import {
+  setTipsBoxVisible,
+  setTipsBoxConfig,
+  setLoginBoxVisible,
+  setUserInfo,
+} from "../../store/globalSlice";
 import { RouteChildrenProps } from "react-router-dom";
 import RecommendList from "./components/RecommendList";
 import RankingList from "./components/RankingList";
@@ -10,15 +15,20 @@ import LoginCard from "./components/LoginCard";
 import PayCard from "./components/PayCard";
 import RechargeCard from "./components/RechargeCard";
 import RechargeBox from "./components/RechargeBox";
+import ConfirmBox from "./components/ConfirmBox";
+import ConfirmBox2 from "./components/ConfirmBox2";
 import {
   requestRecommendArticleList,
-  requestUserInfoByDepartment,
   requestMoreArticleList,
   requestArticleInfo,
   requestBuyArticle,
-  requestRankingList
+  requestRankingList,
+  requestBuyArticleMarketing,
 } from "./service";
-import { requestUserInfo, requestAdConfigInfo } from "../../service";
+import {
+  requestUserInfo as requestMemberInfo,
+  requestAdConfigInfo,
+} from "../../service";
 
 interface LatestClueDetailProps extends RouteChildrenProps {}
 
@@ -28,17 +38,13 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
     (state: RootState) => state.global
   );
   const dispatch = useDispatch();
-  const [
-    recommendArticleListLoading,
-    setRecommendArticleListLoading,
-  ] = useState<boolean>(false);
-  const [articleDetailLoading, setArticleDetailLoading] = useState<boolean>(
-    false
-  );
-  const [moreArticleListLoading, setMoreArticleListLoading] = useState<boolean>(
-    false
-  );
-  const [buyArticleLoading, setbuyArticleLoading] = useState<boolean>(false);
+  const [recommendArticleListLoading, setRecommendArticleListLoading] =
+    useState<boolean>(false);
+  const [articleDetailLoading, setArticleDetailLoading] =
+    useState<boolean>(false);
+  const [moreArticleListLoading, setMoreArticleListLoading] =
+    useState<boolean>(false);
+  const [buyArticleLoading, setBuyArticleLoading] = useState<boolean>(false);
 
   const [recommendArticleList, setRecommendArticleList] = useState<any>([]);
   const [userList, setUserList] = useState<any>([]);
@@ -49,6 +55,74 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
   const { id } = match?.params as any;
   const [headerAdv, setHeaderAdv] = useState<any>([]);
   const [footerAdv, setFooterAdv] = useState<any>([]);
+  const [confirmBoxVisible, setConfirmBoxVisible] = useState<boolean>(false);
+  const [confirmBox2Visible, setConfirmBox2Visible] = useState<boolean>(false);
+  const [userDetail, setUserDetail] = useState<any>({});
+  const [subscribeLoading, setSubscribeLoading] = useState<boolean>(false);
+  const articleMarketingMap = useRef<any>({});
+
+  /**
+   * 确定购买按钮
+   * @param e
+   */
+  const onConfirmBuy = (e: any) => {
+    const key = e.target.getAttribute("data-id");
+    setUserDetail(articleMarketingMap.current[key]);
+    setConfirmBoxVisible(true);
+  };
+
+  /**
+   * 添加所有文章按钮的事件监听
+   */
+  const addButtonEventListener = (articleMarketingList: any) => {
+    const ckEl = window.document.querySelector(".ck-content");
+    if (!ckEl) {
+      return;
+    }
+    const btnEls = ckEl.querySelectorAll(
+      ".recommend-button, .recommend-result"
+    );
+    
+    for (let i = 0; i < btnEls.length; i++) {
+      const btnEl = btnEls[i];
+      if (btnEl.tagName === "SPAN") {
+        continue;
+      }
+
+      if (articleMarketingList[i].buy) {
+        // 已购买
+        const parentEl = btnEl.parentNode;
+        const spanEl = document.createElement("span");
+        spanEl.classList.add("recommend-result");
+        spanEl.appendChild(
+          document.createTextNode(articleMarketingList[i].proposal)
+        );
+        if (parentEl) {
+          parentEl.replaceChild(spanEl, btnEl);
+        }
+      } else {
+        // 未购买
+        const value = btnEl.getAttribute("data-id");
+        if (value) {
+          continue;
+        }
+        btnEl.setAttribute("data-id", articleMarketingList[i].id);
+        btnEl.addEventListener("click", onConfirmBuy);
+      }
+    }
+  };
+
+  /**
+   * 移除所有文章按钮的事件监听
+   */
+  const clearButtonEventListener = () => {
+    const btnEls = window.document.querySelectorAll(
+      ".ck-content .recommend-button"
+    );
+    btnEls.forEach((btnEl: any) => {
+      btnEl.removeEventListener("click", onConfirmBuy);
+    });
+  };
 
   /**
    * 获取推荐内容
@@ -68,28 +142,23 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
       });
   };
 
-  // 线人精准榜
-  const getUserList = (departId: string, cb: (result: any) => void) => {
-    const params = {
-      token,
-      departId,
-    };
-    requestUserInfoByDepartment(params).then((res) => {
-      if (res.data.code === 0) {
-        cb && cb(res.data.result);
-      } else {
-        console.error(res.data.message);
-      }
-    });
-  };
-
   // 文章详情
-  const getArticleInfo = (params: any, cb?: any) => {
+  const getArticleInfo = (cb?: any) => {
     setArticleDetailLoading(true);
-    requestArticleInfo(params)
+    requestArticleInfo({ token, articleId: id })
       .then((res) => {
         if (res.data.code === 0) {
-          setArticleDetail(res.data.result);
+          const articleDetail = res.data.result;
+          setArticleDetail(articleDetail);
+
+          if (
+            articleDetail.isBuy &&
+            articleDetail.articleMarketingList &&
+            articleDetail.articleMarketingList.length > 0
+          ) {
+            addButtonEventListener(articleDetail.articleMarketingList);
+          }
+
           cb && cb(res.data.result);
         } else {
           console.error(res.data.message);
@@ -128,7 +197,7 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
 
   // 获取会员信息
   const getMemberInfo = () => {
-    requestUserInfo(token).then((res) => {
+    requestMemberInfo(token).then((res) => {
       if (res.data.code === 0) {
         const userInfo = res.data.result;
         dispatch(setUserInfo(userInfo));
@@ -138,35 +207,50 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
   };
 
   // 购买文章请求
-  const buyArticle = (articleId: string) => {
-    setbuyArticleLoading(true);
-    requestBuyArticle({ token, articleId })
+  const buyArticle = (cb?: () => void) => {
+    setBuyArticleLoading(true);
+    requestBuyArticle({ token, articleId: id })
       .then((res) => {
         if (res.data.code === 0) {
-          getArticleInfo({ token, articleId: id });
-          getMemberInfo()
+          cb && cb();
+          dispatch(
+            setTipsBoxConfig({
+              type: "success",
+              title: "操作成功",
+              content: res.data.message,
+            })
+          );
+          dispatch(setTipsBoxVisible(true));
         } else {
+          dispatch(
+            setTipsBoxConfig({
+              type: "error",
+              title: "操作失败",
+              content: res.data.message,
+            })
+          );
+          dispatch(setTipsBoxVisible(true));
         }
       })
       .finally(() => {
-        setbuyArticleLoading(false);
+        setBuyArticleLoading(false);
       });
   };
 
   // 点击登录按钮
   const onLoginClick = () => {
     dispatch(setLoginBoxVisible(true));
-  }
+  };
 
   // 点击购买按钮
-  const onPayClick = (articleId: string) => {
-    buyArticle(articleId);
+  const onPayClick = () => {
+    setConfirmBox2Visible(true);
   };
 
   // 点击充值按钮
   const onRechargeClick = () => {
     // setRechargeBoxVisible(true);
-    history.push("/user-center")
+    history.push("/user-center");
   };
 
   // 显示更多
@@ -181,14 +265,16 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
   const getRenderContent = () => {
     if (!isLogin) {
       // 未登录
-      return <LoginCard articleDetail={articleDetail} onLoginClick={onLoginClick} />;
+      return (
+        <LoginCard articleDetail={articleDetail} onLoginClick={onLoginClick} />
+      );
     } else {
       if (articleDetail.isBuy) {
         // 已购买
         return (
           <div
             className="b-cont ck-content"
-            style={{ lineHeight: 'unset' }}
+            style={{ lineHeight: "unset" }}
             dangerouslySetInnerHTML={{ __html: articleDetail.articleURL }}
           />
         );
@@ -242,6 +328,101 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
     });
   };
 
+  /**
+   * 订阅推介
+   */
+  const onConfirmBoxSubmit = (values: any) => {
+    if (subscribeLoading) {
+      return;
+    }
+
+    const { id: articleMarketingId } = values;
+    setSubscribeLoading(true);
+    requestBuyArticleMarketing({ token, articleMarketingId })
+      .then((res) => {
+        if (res.data.code === 0) {
+          const btnEl = window.document.querySelector(
+            `[data-id="${articleMarketingId}"]`
+          );
+          if (btnEl) {
+            btnEl.removeEventListener("click", onConfirmBuy);
+          }
+          dispatch(
+            setTipsBoxConfig({
+              type: "success",
+              title: "操作成功",
+              content: res.data.message,
+            })
+          );
+          dispatch(setTipsBoxVisible(true));
+          onConfirmBoxClose();
+          getMemberInfo();
+          getArticleInfo();
+        } else {
+          dispatch(
+            setTipsBoxConfig({
+              type: "error",
+              title: "操作失败",
+              content: res.data.message,
+            })
+          );
+          dispatch(setTipsBoxVisible(true));
+        }
+      })
+      .finally(() => {
+        setSubscribeLoading(false);
+      });
+  };
+
+  /**
+   * 关闭确认框
+   */
+  const onConfirmBoxClose = () => {
+    setConfirmBoxVisible(false);
+    setTimeout(() => {
+      setUserDetail({});
+    }, 100);
+  };
+
+  /**
+   * 购买文章
+   */
+  const onConfirmBox2Submit = () => {
+    if (buyArticleLoading) {
+      return;
+    }
+
+    buyArticle(() => {
+      onConfirmBox2Close();
+      getMemberInfo();
+      getArticleInfo();
+    });
+  };
+
+  /**
+   * 关闭确认框
+   */
+  const onConfirmBox2Close = () => {
+    setConfirmBox2Visible(false);
+  };
+
+  useEffect(() => {
+    if (
+      articleDetail.articleMarketingList &&
+      articleDetail.articleMarketingList.length > 0
+    ) {
+      const obj: any = {};
+      articleDetail.articleMarketingList.forEach((item: any) => {
+        obj[item.id] = item;
+      });
+      articleMarketingMap.current = obj;
+    }
+
+    return () => {
+      articleMarketingMap.current = {};
+    };
+  }, [articleDetail.articleMarketingList]);
+
   useEffect(() => {
     getAdConfigInfo((result) => {
       if (result) {
@@ -257,6 +438,10 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
         }
       }
     });
+
+    return () => {
+      clearButtonEventListener();
+    };
   }, []);
 
   useEffect(() => {
@@ -264,7 +449,7 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
     if (token) {
       if (isLogin) {
         getMemberInfo();
-        getArticleInfo({ token, articleId: id }, (res: any) => {
+        getArticleInfo((res: any) => {
           getMoreArticleList({ token, userId: res.userId });
         });
         getRecommendArticleList();
@@ -278,7 +463,7 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
         });
       }
     } else {
-      getArticleInfo({ token, articleId: id }, (res: any) => {
+      getArticleInfo((res: any) => {
         getMoreArticleList({ token, userId: res.userId });
       });
       getRecommendArticleList();
@@ -296,6 +481,22 @@ const LatestClueDetail: React.FC<LatestClueDetailProps> = (props) => {
   return (
     <div>
       {rechargeBoxVisible ? <RechargeBox onClose={onRechargeBoxClose} /> : null}
+      {confirmBoxVisible ? (
+        <ConfirmBox
+          userInfo={userInfo}
+          userDetail={userDetail}
+          onConfirm={onConfirmBoxSubmit}
+          onClose={onConfirmBoxClose}
+        />
+      ) : null}
+      {confirmBox2Visible ? (
+        <ConfirmBox2
+          userInfo={userInfo}
+          userDetail={articleDetail}
+          onConfirm={onConfirmBox2Submit}
+          onClose={onConfirmBox2Close}
+        />
+      ) : null}
 
       <div className="top-gg box-s">
         <img
